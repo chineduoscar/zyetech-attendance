@@ -46,7 +46,10 @@ const StudentAttendance = () => {
       setCourse("");
       setSession("");
     } catch (error) {
-      setErrors({ form: error.message || "Attendance could not be saved. Please try again." });
+      setErrors({
+        form:
+          error.message || "Attendance could not be saved. Please try again.",
+      });
     } finally {
       setSaving(false);
     }
@@ -63,109 +66,108 @@ const StudentAttendance = () => {
   }
 
   return (
-    <section className="flex flex-1 justify-center px-5 py-12">
-        <div className="h-fit w-full max-w-120 rounded-2xl border border-[#cfd3ec] bg-white p-7 sm:p-8">
-          <h1 className="mb-1.5 text-2xl font-bold leading-tight">
-            Student Attendance
-          </h1>
-          <p className="mb-6 text-[0.95rem] text-[#4a4d85]">
-            Enter your name, your course and the session you are attending
-            today.
-          </p>
+    <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
+      <div className="h-fit w-full max-w-120 rounded-2xl border border-[#cfd3ec] bg-white p-7 sm:p-8">
+        <h1 className="mb-1.5 text-2xl font-bold leading-tight">
+          Student Attendance
+        </h1>
+        <p className="mb-6 text-[0.95rem] text-[#4a4d85]">
+          Enter your name, your course and the session you are attending today.
+        </p>
 
-          <form onSubmit={handleSubmit} noValidate>
-            {errors.form && (
-              <p role="alert" className="mb-4 text-sm text-red-700">
-                {errors.form}
-              </p>
-            )}
-            <div className="mb-5">
-              <label
-                htmlFor="st-name"
-                className="mb-1.5 block text-sm font-semibold"
-              >
-                Name
-              </label>
-              <input
-                id="st-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your full name"
-                autoComplete="name"
-                className={fieldClass(errors.name)}
-              />
-              {errors.name && (
-                <p className="mt-1.5 text-sm text-red-700">{errors.name}</p>
-              )}
-            </div>
-
-            <div className="mb-5">
-              <label
-                htmlFor="st-course"
-                className="mb-1.5 block text-sm font-semibold"
-              >
-                Course
-              </label>
-              <select
-                id="st-course"
-                value={course}
-                onChange={(e) => setCourse(e.target.value)}
-                className={fieldClass(errors.course)}
-              >
-                <option value="">Select your course</option>
-                {COURSES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              {errors.course && (
-                <p className="mt-1.5 text-sm text-red-700">{errors.course}</p>
-              )}
-            </div>
-
-            <fieldset className="mb-5 min-w-0 border-0 p-0">
-              <legend className="mb-1.5 p-0 text-sm font-semibold">
-                Session
-              </legend>
-              <div className="grid grid-cols-2 gap-2.5">
-                {SESSIONS.map((s) => (
-                  <div key={s}>
-                    <input
-                      type="radio"
-                      id={`st-session-${s}`}
-                      name="session"
-                      value={s}
-                      checked={session === s}
-                      onChange={() => setSession(s)}
-                      className="peer sr-only"
-                    />
-                    <label
-                      htmlFor={`st-session-${s}`}
-                      className={`block cursor-pointer rounded-lg border-[1.5px] bg-white px-3.5 py-3 text-center font-semibold transition-colors peer-checked:border-[#06066f] peer-checked:bg-[#06066f] peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-indigo-400 ${
-                        errors.session ? "border-red-700" : "border-[#cfd3ec]"
-                      }`}
-                    >
-                      {s}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              {errors.session && (
-                <p className="mt-1.5 text-sm text-red-700">{errors.session}</p>
-              )}
-            </fieldset>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 cursor-pointer"
+        <form onSubmit={handleSubmit} noValidate>
+          {errors.form && (
+            <p role="alert" className="mb-4 text-sm text-red-700">
+              {errors.form}
+            </p>
+          )}
+          <div className="mb-5">
+            <label
+              htmlFor="st-name"
+              className="mb-1.5 block text-sm font-semibold"
             >
-              {saving ? "Saving…" : "Mark attendance"}
-            </button>
-          </form>
-        </div>
+              Name
+            </label>
+            <input
+              id="st-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              autoComplete="name"
+              className={fieldClass(errors.name)}
+            />
+            {errors.name && (
+              <p className="mt-1.5 text-sm text-red-700">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="mb-5">
+            <label
+              htmlFor="st-course"
+              className="mb-1.5 block text-sm font-semibold"
+            >
+              Course
+            </label>
+            <select
+              id="st-course"
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              className={fieldClass(errors.course)}
+            >
+              <option value="">Select your course</option>
+              {COURSES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            {errors.course && (
+              <p className="mt-1.5 text-sm text-red-700">{errors.course}</p>
+            )}
+          </div>
+
+          <fieldset className="mb-5 min-w-0 border-0 p-0">
+            <legend className="mb-1.5 p-0 text-sm font-semibold">
+              Session
+            </legend>
+            <div className="grid grid-cols-2 gap-2.5">
+              {SESSIONS.map((s) => (
+                <div key={s}>
+                  <input
+                    type="radio"
+                    id={`st-session-${s}`}
+                    name="session"
+                    value={s}
+                    checked={session === s}
+                    onChange={() => setSession(s)}
+                    className="peer sr-only"
+                  />
+                  <label
+                    htmlFor={`st-session-${s}`}
+                    className={`block cursor-pointer rounded-lg border-[1.5px] bg-white px-3.5 py-3 text-center font-semibold transition-colors peer-checked:border-[#06066f] peer-checked:bg-[#06066f] peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-indigo-400 ${
+                      errors.session ? "border-red-700" : "border-[#cfd3ec]"
+                    }`}
+                  >
+                    {s}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {errors.session && (
+              <p className="mt-1.5 text-sm text-red-700">{errors.session}</p>
+            )}
+          </fieldset>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 cursor-pointer"
+          >
+            {saving ? "Saving…" : "Mark attendance"}
+          </button>
+        </form>
+      </div>
     </section>
   );
 };

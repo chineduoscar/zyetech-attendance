@@ -61,7 +61,7 @@ const StaffAttendance = () => {
   }
 
   return (
-    <section className="flex flex-1 justify-center px-5 py-12">
+    <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
       <div className="h-fit w-full max-w-120 rounded-2xl border border-[#cfd3ec] bg-white p-7 sm:p-8">
         <h1 className="mb-1.5 text-2xl font-bold leading-tight">
           Staff Attendance
