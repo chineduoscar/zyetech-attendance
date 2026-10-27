@@ -66,12 +66,12 @@ const StudentAttendance = () => {
   }
 
   return (
-    <section className="flex min-h-full w-full flex-1 items-center justify-center px-0 py-4 sm:px-5 sm:py-10">
-      <div className="h-fit w-full max-w-120 rounded-2xl border border-[#cfd3ec] bg-white p-5 sm:p-8">
-        <h1 className="mb-1.5 text-xl font-bold leading-tight sm:text-2xl">
+    <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
+      <div className="h-fit w-full max-w-120 rounded-2xl border border-[#cfd3ec] bg-white p-7 sm:p-8">
+        <h1 className="mb-1.5 text-2xl font-bold leading-tight">
           Student Attendance
         </h1>
-        <p className="mb-5 text-sm text-[#4a4d85] sm:mb-6 sm:text-[0.95rem]">
+        <p className="mb-6 text-[0.95rem] text-[#4a4d85]">
           Enter your name, your course and the session you are attending today.
         </p>
 
@@ -81,7 +81,7 @@ const StudentAttendance = () => {
               {errors.form}
             </p>
           )}
-          <div className="mb-4 sm:mb-5">
+          <div className="mb-5">
             <label
               htmlFor="st-name"
               className="mb-1.5 block text-sm font-semibold"
@@ -102,7 +102,7 @@ const StudentAttendance = () => {
             )}
           </div>
 
-          <div className="mb-4 sm:mb-5">
+          <div className="mb-5">
             <label
               htmlFor="st-course"
               className="mb-1.5 block text-sm font-semibold"
@@ -131,7 +131,7 @@ const StudentAttendance = () => {
             <legend className="mb-1.5 p-0 text-sm font-semibold">
               Session
             </legend>
-            <div className="grid grid-cols-1 gap-2.5 min-[380px]:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {SESSIONS.map((s) => (
                 <div key={s}>
                   <input
@@ -162,7 +162,7 @@ const StudentAttendance = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full cursor-pointer rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+            className="w-full rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 cursor-pointer"
           >
             {saving ? "Saving…" : "Mark attendance"}
           </button>
