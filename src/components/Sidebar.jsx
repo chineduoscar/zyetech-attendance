@@ -17,101 +17,101 @@ const Icon = ({ children }) => (
   </svg>
 );
 
-const FILE = (
-  <>
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <path d="M14 2v6h6" />
-  </>
-);
-
-const ICONS = {
+const navIcon = {
   home: (
-    <Icon>
-      <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-    </Icon>
+    <>
+      <path d="m3 10 9-7 9 7" />
+      <path d="M5 9v12h14V9M9 21v-7h6v7" />
+    </>
   ),
-  staffAttendance: (
-    <Icon>
+  userManagement: (
+    <>
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
       <circle cx="9" cy="7" r="4" />
-      <path d="M16 11l2 2 4-4" />
-    </Icon>
+      <path d="M19 8v6M22 11h-6" />
+    </>
+  ),
+  staffAttendance: (
+    <>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="m16 11 2 2 4-4" />
+    </>
   ),
   studentAttendance: (
-    <Icon>
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" />
-    </Icon>
-  ),
-  receipts: (
-    <Icon>
-      {FILE}
-      <path d="M8 13h8M8 17h8" />
-    </Icon>
+    <>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M16 3.5a4 4 0 0 1 0 7.8M20 21v-2a4 4 0 0 0-3-3.87" />
+    </>
   ),
   generateReceipts: (
-    <Icon>
-      {FILE}
-      <path d="M12 18v-6M9 15h6" />
-    </Icon>
+    <>
+      <path d="M4 3h16v18l-3-2-3 2-3-2-3 2-4-2z" />
+      <path d="M8 8h8M8 12h8M8 16h3" />
+    </>
   ),
   allReceipts: (
-    <Icon>
-      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
-    </Icon>
+    <>
+      <path d="M4 3h16v18l-3-2-3 2-3-2-3 2-4-2z" />
+      <path d="M8 8h8M8 12h8" />
+    </>
   ),
   students: (
-    <Icon>
-      <path d="M22 10L12 5 2 10l10 5 10-5z" />
-      <path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </Icon>
+    <>
+      <circle cx="9" cy="8" r="4" />
+      <path d="M3 21v-2a6 6 0 0 1 12 0v2M17 8h4M19 6v4" />
+    </>
   ),
   staffs: (
-    <Icon>
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-    </Icon>
+    <>
+      <rect x="3" y="7" width="18" height="14" rx="2" />
+      <path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2" />
+    </>
   ),
 };
+
+// Hidden for now. Remove an icon from this list to show the link again.
+const HIDDEN_ICONS = ["students", "staffs"];
+const visibleNavItems = NAV_ITEMS.filter(
+  (item) => !HIDDEN_ICONS.includes(item.icon),
+);
 
 const Sidebar = ({
   variant = "fixed",
   onClose,
   collapsed = false,
   onToggleCollapse,
+  user,
+  onLogout,
+  loggingOut,
 }) => {
   const isDrawer = variant === "drawer";
-
-  const widthClass = isDrawer ? "w-64 max-w-[85vw]" : "h-full w-full";
   const labelClass = !isDrawer && collapsed ? "sr-only" : "";
   const rowClass = !isDrawer && collapsed ? "justify-center" : "justify-start";
-
   const itemBase =
-    "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3.5 py-2.5 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300";
+    "flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400";
 
   return (
     <aside
-      className={`flex h-dvh shrink-0 flex-col overflow-hidden bg-[#06066f] text-white ${widthClass}`}
+      className={`flex h-dvh shrink-0 flex-col overflow-hidden border-r border-[#cfd3ec] bg-[#eef0fa] text-[#06066f] ${
+        isDrawer ? "w-64 max-w-[85vw]" : "h-full w-full"
+      }`}
     >
       <div
-        className={`flex min-h-22 items-center gap-3 border-b border-white/15 px-3 py-4 ${
+        className={`flex min-h-22 items-center gap-3 border-b border-[#cfd3ec] px-3 py-4 ${
           !isDrawer && collapsed ? "justify-center" : "justify-start px-5"
         }`}
       >
-        <span
-          className="relative h-10 w-10 shrink-0 overflow-hidden"
+        <img
+          src="/logo.png"
+          alt=""
           aria-hidden="true"
-        >
-          <img
-            src="/logo-white.png"
-            alt=""
-            className="absolute left-1/2 top-1/2 w-19 max-w-none -translate-x-1/2 -translate-y-1/2"
-          />
-        </span>
+          className="h-10 w-10 shrink-0 object-contain"
+        />
         <span className={`min-w-0 flex-1 leading-tight ${labelClass}`}>
           <span className="block text-sm font-bold uppercase">Zyetech</span>
-          <span className="mt-1 block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/70">
+          <span className="mt-1 block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-[#4a4d85]">
             Innovation Technology
           </span>
         </span>
@@ -120,7 +120,7 @@ const Sidebar = ({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="ml-auto cursor-pointer rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-indigo-300"
+            className="ml-auto cursor-pointer rounded-lg p-1.5 text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f] focus-visible:outline-2 focus-visible:outline-indigo-400"
           >
             <Icon>
               <path d="M18 6L6 18M6 6l12 12" />
@@ -129,9 +129,9 @@ const Sidebar = ({
         )}
       </div>
 
-      <nav aria-label="Admin" className="flex flex-col gap-1 px-3 py-4">
-        {NAV_ITEMS.map((item) => {
-          return (
+      {user && ["admin", "superadmin"].includes(user.role) && (
+        <nav aria-label="Admin" className="flex flex-col gap-1 px-3 py-4">
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.key}
               to={item.path}
@@ -142,36 +142,53 @@ const Sidebar = ({
               className={({ isActive }) =>
                 `${itemBase} ${rowClass} ${
                   isActive
-                    ? "bg-white text-[#06066f]"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                    ? "bg-[#06066f] text-white"
+                    : "text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f]"
                 }`
               }
             >
-              {ICONS[item.icon]}
+              <Icon>{navIcon[item.icon]}</Icon>
               <span className={labelClass}>{item.label}</span>
             </NavLink>
-          );
-        })}
-      </nav>
+          ))}
+        </nav>
+      )}
 
-      <div className="mt-auto border-t border-white/15 px-3 py-4">
+      <div className="mt-auto border-t border-[#cfd3ec] px-3 py-4">
         <div
-          className={`${itemBase} ${rowClass} text-white/60`}
-          aria-label="Administrator"
-          title="Administrator"
+          className={`${itemBase} ${rowClass} cursor-default text-[#4a4d85]`}
+          title={user?.email}
+        >
+          <Icon>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M5 21a7 7 0 0 1 14 0" />
+          </Icon>
+          <span className={`${labelClass} min-w-0 truncate`}>
+            {user?.name || "Administrator"}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onLogout}
+          disabled={loggingOut}
+          aria-label="Log out"
+          title="Log out"
+          className={`${itemBase} ${rowClass} mt-1 cursor-pointer text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f] disabled:cursor-wait disabled:opacity-60`}
         >
           <Icon>
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
           </Icon>
-          <span className={labelClass}>Admin</span>
-        </div>
+          <span className={labelClass}>
+            {loggingOut ? "Logging out…" : "Log out"}
+          </span>
+        </button>
         {!isDrawer && onToggleCollapse && (
           <button
             type="button"
             onClick={onToggleCollapse}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`${itemBase} mt-2 ${rowClass} text-white/80 hover:bg-white/10 hover:text-white`}
+            className={`${itemBase} ${rowClass} mt-2 cursor-pointer text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f]`}
           >
             <Icon>
               {collapsed ? (

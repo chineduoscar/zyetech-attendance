@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AttendanceVerification from "./VerifyAttendance";
 import { COURSES } from "../../data/data";
-import { saveAttendanceRecord } from "../../data/attendance";
+import { apiRequest } from "../../api/client";
 
 const SESSIONS = ["Morning", "Evening"];
 
@@ -16,6 +16,7 @@ const StudentAttendance = () => {
   const [session, setSession] = useState("");
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const validate = () => {
     const next = {};
@@ -25,30 +26,30 @@ const StudentAttendance = () => {
     return next;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const next = validate();
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    // Replace this with your API call
-    const record = {
-      name: name.trim(),
-      course,
-      session,
-      time: new Date().toISOString(),
-    };
+    setSaving(true);
     try {
-      saveAttendanceRecord("student", record);
-    } catch {
-      setErrors({ form: "Attendance could not be saved. Please try again." });
-      return;
+      const response = await apiRequest("/api/student-attendance", {
+        method: "POST",
+        body: JSON.stringify({ name: name.trim(), course, session }),
+      });
+      setSubmitted({
+        ...response.data,
+        time: response.data.created_at,
+      });
+      setName("");
+      setCourse("");
+      setSession("");
+    } catch (error) {
+      setErrors({ form: error.message || "Attendance could not be saved. Please try again." });
+    } finally {
+      setSaving(false);
     }
-
-    setSubmitted(record);
-    setName("");
-    setCourse("");
-    setSession("");
   };
 
   // After a successful submit, go to the verification page
@@ -158,9 +159,10 @@ const StudentAttendance = () => {
 
             <button
               type="submit"
+              disabled={saving}
               className="w-full rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 cursor-pointer"
             >
-              Mark attendance
+              {saving ? "Saving…" : "Mark attendance"}
             </button>
           </form>
         </div>

@@ -23,6 +23,12 @@ export const COURSES = [
 export const NAV_ITEMS = [
   { key: "dashboard", label: "Home", icon: "home", path: "/admin/dashboard" },
   {
+    key: "user-management",
+    label: "User Management",
+    icon: "userManagement",
+    path: "/admin/users",
+  },
+  {
     key: "staff-attendance",
     label: "Staff Attendance",
     icon: "staffAttendance",

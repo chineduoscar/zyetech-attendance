@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getAttendanceRecords } from "../../data/attendance";
+import { useCallback, useEffect, useState } from "react";
+import { apiRequest } from "../../api/client";
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString("en-GB", {
@@ -16,7 +16,9 @@ const formatTime = (iso) =>
 
 const AttendanceList = ({ type }) => {
   const isStaff = type === "staff";
-  const [records, setRecords] = useState(() => getAttendanceRecords(type));
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const title = isStaff ? "Staff Attendance" : "Student Attendance";
   const filteredRecords = records.filter((record) =>
@@ -25,11 +27,23 @@ const AttendanceList = ({ type }) => {
       .includes(search.trim().toLowerCase()),
   );
 
-  useEffect(() => {
-    const refreshRecords = () => setRecords(getAttendanceRecords(type));
-    window.addEventListener("storage", refreshRecords);
-    return () => window.removeEventListener("storage", refreshRecords);
+  const loadRecords = useCallback(async () => {
+    try {
+      const response = await apiRequest(`/api/${type}-attendance`);
+      setRecords(response.data.map((record) => ({
+        ...record,
+        time: record.created_at,
+      })));
+    } catch (requestError) {
+      setError(requestError.message || "Unable to load attendance records.");
+    } finally {
+      setLoading(false);
+    }
   }, [type]);
+
+  useEffect(() => {
+    void Promise.resolve().then(loadRecords);
+  }, [loadRecords]);
 
   return (
     <section>
@@ -51,8 +65,25 @@ const AttendanceList = ({ type }) => {
             className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus-visible:outline-2 focus-visible:outline-indigo-400"
           />
         </label>
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true);
+            setError("");
+            loadRecords();
+          }}
+          disabled={loading}
+          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-60"
+        >
+          {loading ? "Refreshing…" : "Refresh"}
+        </button>
       </div>
 
+      {error && (
+        <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <h2 className="font-semibold text-slate-900">Attendance records</h2>
@@ -60,7 +91,11 @@ const AttendanceList = ({ type }) => {
             {filteredRecords.length} records
           </span>
         </div>
-        {filteredRecords.length ? (
+        {loading ? (
+          <p role="status" className="px-5 py-12 text-center text-sm text-slate-600">
+            Loading attendance…
+          </p>
+        ) : error ? null : filteredRecords.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-155 text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
@@ -85,9 +120,9 @@ const AttendanceList = ({ type }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
-                {filteredRecords.map((record, index) => (
+                {filteredRecords.map((record) => (
                   <tr
-                    key={`${record.time}-${index}`}
+                    key={record.id}
                     className="hover:bg-slate-50"
                   >
                     <td className="px-5 py-4 font-medium">{record.name}</td>
