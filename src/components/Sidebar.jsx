@@ -173,7 +173,7 @@ const Sidebar = ({
           disabled={loggingOut}
           aria-label="Log out"
           title="Log out"
-          className={`${itemBase} ${rowClass} mt-1 cursor-pointer text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f] disabled:cursor-wait disabled:opacity-60`}
+          className={`${itemBase} ${rowClass} mt-1 cursor-pointer text-[#4a4d85] hover:bg-[#dfe2f3] hover:text-[#06066f] disabled:opacity-60`}
         >
           <Icon>
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />

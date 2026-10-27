@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AttendanceVerification from "./VerifyAttendance";
 import { COURSES } from "../../data/data";
 import { apiRequest } from "../../api/client";
 
-const SESSIONS = ["Morning", "Evening"];
+const SESSIONS = ["Morning", "Afternoon"];
+const CUTOFF_HOUR = 13; // 1:00 PM
+
+const getAvailableSessions = () =>
+  new Date().getHours() < CUTOFF_HOUR ? SESSIONS : ["Afternoon"];
 
 const fieldClass = (hasError) =>
   `w-full rounded-lg border-[1.5px] bg-white px-3.5 py-3 text-[#06066f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 ${
@@ -14,15 +18,34 @@ const StudentAttendance = () => {
   const [name, setName] = useState("");
   const [course, setCourse] = useState("");
   const [session, setSession] = useState("");
+  const [availableSessions, setAvailableSessions] =
+    useState(getAvailableSessions);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  // If the chosen session is no longer available (e.g. Morning after 1 PM), treat it as not selected
+  const activeSession = availableSessions.includes(session) ? session : "";
+
+  // Re-check every minute so Morning disappears at 1:00 PM without a refresh
+  useEffect(() => {
+    const id = setInterval(
+      () => setAvailableSessions(getAvailableSessions()),
+      60000,
+    );
+    return () => clearInterval(id);
+  }, []);
 
   const validate = () => {
     const next = {};
     if (!name.trim()) next.name = "Enter your full name.";
     if (!course) next.course = "Select your course.";
-    if (!session) next.session = "Choose morning or evening.";
+    if (!activeSession) {
+      next.session =
+        availableSessions.length > 1
+          ? "Choose morning or afternoon."
+          : "Choose the afternoon session.";
+    }
     return next;
   };
 
@@ -36,7 +59,11 @@ const StudentAttendance = () => {
     try {
       const response = await apiRequest("/api/student-attendance", {
         method: "POST",
-        body: JSON.stringify({ name: name.trim(), course, session }),
+        body: JSON.stringify({
+          name: name.trim(),
+          course,
+          session: activeSession,
+        }),
       });
       setSubmitted({
         ...response.data,
@@ -131,15 +158,19 @@ const StudentAttendance = () => {
             <legend className="mb-1.5 p-0 text-sm font-semibold">
               Session
             </legend>
-            <div className="grid grid-cols-2 gap-2.5">
-              {SESSIONS.map((s) => (
+            <div
+              className={`grid gap-2.5 ${
+                availableSessions.length > 1 ? "grid-cols-2" : "grid-cols-1"
+              }`}
+            >
+              {availableSessions.map((s) => (
                 <div key={s}>
                   <input
                     type="radio"
                     id={`st-session-${s}`}
                     name="session"
                     value={s}
-                    checked={session === s}
+                    checked={activeSession === s}
                     onChange={() => setSession(s)}
                     className="peer sr-only"
                   />
@@ -162,7 +193,7 @@ const StudentAttendance = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 cursor-pointer"
+            className="w-full cursor-pointer rounded-lg bg-[#06066f] py-3 font-bold text-white transition-colors hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
           >
             {saving ? "Saving…" : "Mark attendance"}
           </button>
