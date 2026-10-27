@@ -71,12 +71,6 @@ const navIcon = {
   ),
 };
 
-// Hidden for now. Remove an icon from this list to show the link again.
-const HIDDEN_ICONS = ["students", "staffs"];
-const visibleNavItems = NAV_ITEMS.filter(
-  (item) => !HIDDEN_ICONS.includes(item.icon),
-);
-
 const Sidebar = ({
   variant = "fixed",
   onClose,
@@ -131,7 +125,7 @@ const Sidebar = ({
 
       {user && ["admin", "superadmin"].includes(user.role) && (
         <nav aria-label="Admin" className="flex flex-col gap-1 px-3 py-4">
-          {visibleNavItems.map((item) => (
+          {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.key}
               to={item.path}

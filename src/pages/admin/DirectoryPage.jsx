@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
-import { COURSES } from "../../data/data";
+import { COURSES, STAFF_ROLES } from "../../data/data";
 
 const emptyForm = {
   name: "",
   email: "",
   phone: "",
   course: "",
+  roles: [],
   status: "active",
 };
 
@@ -77,6 +78,7 @@ const DirectoryPage = ({ kind }) => {
       email: record.email || "",
       phone: record.phone || "",
       course: record.course || "",
+      roles: record.roles || [],
       status: record.status,
     });
   };
@@ -128,7 +130,7 @@ const DirectoryPage = ({ kind }) => {
 
       <form onSubmit={handleSubmit} className="mb-6 rounded-2xl border border-[#cfd3ec] bg-white p-5">
         <h2 className="mb-4 text-lg font-bold">
-          {editingId ? `Edit ${isStudents ? "student" : "staff"} profile` : `Add ${isStudents ? "student" : "staff"}`}
+          {editingId ? `Edit ${isStudents ? "student" : "staff"}` : `Add ${isStudents ? "student" : "staff"}`}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <label className="text-sm font-semibold">
@@ -144,6 +146,7 @@ const DirectoryPage = ({ kind }) => {
           <label className="text-sm font-semibold">
             Email
             <input
+              required
               type="email"
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
@@ -175,17 +178,43 @@ const DirectoryPage = ({ kind }) => {
               </select>
             </label>
           )}
-          <label className="text-sm font-semibold">
-            Status
-            <select
-              value={form.status}
-              onChange={(event) => setForm({ ...form, status: event.target.value })}
-              className={`${inputClass} mt-1.5`}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </label>
+          {!isStudents && (
+            <fieldset className="min-w-0 border-0 p-0 text-sm font-semibold">
+              <legend>Staff role(s)</legend>
+              <div className="mt-1.5 max-h-48 space-y-2 overflow-y-auto rounded-lg border border-slate-300 p-3">
+                {STAFF_ROLES.map((role) => (
+                  <label key={role} className="flex items-center gap-2 font-normal">
+                    <input
+                      type="checkbox"
+                      checked={form.roles.includes(role)}
+                      onChange={() =>
+                        setForm((current) => ({
+                          ...current,
+                          roles: current.roles.includes(role)
+                            ? current.roles.filter((item) => item !== role)
+                            : [...current.roles, role],
+                        }))
+                      }
+                    />
+                    {role}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          {editingId && (
+            <label className="text-sm font-semibold">
+              Status
+              <select
+                value={form.status}
+                onChange={(event) => setForm({ ...form, status: event.target.value })}
+                className={`${inputClass} mt-1.5`}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </label>
+          )}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button
@@ -195,11 +224,9 @@ const DirectoryPage = ({ kind }) => {
           >
             {saving ? "Saving…" : editingId ? "Save changes" : `Add ${isStudents ? "student" : "staff"}`}
           </button>
-          {editingId && (
-            <button type="button" onClick={resetForm} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">
-              Cancel
-            </button>
-          )}
+          <button type="button" onClick={resetForm} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">
+            {editingId ? "Cancel" : "Clear"}
+          </button>
         </div>
       </form>
 
@@ -213,10 +240,12 @@ const DirectoryPage = ({ kind }) => {
             <table className="w-full min-w-[700px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
+                  <th scope="col" className="px-5 py-3 font-semibold">ID</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Name</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Email</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Phone</th>
                   {isStudents && <th scope="col" className="px-5 py-3 font-semibold">Course</th>}
+                  {!isStudents && <th scope="col" className="px-5 py-3 font-semibold">Roles</th>}
                   <th scope="col" className="px-5 py-3 font-semibold">Status</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Actions</th>
                 </tr>
@@ -224,22 +253,24 @@ const DirectoryPage = ({ kind }) => {
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 {records.map((record) => (
                   <tr key={record.id} className="hover:bg-slate-50">
+                    <td className="px-5 py-4 font-semibold">{isStudents ? record.student_number : record.staff_number}</td>
                     <td className="px-5 py-4 font-medium">{record.name}</td>
                     <td className="px-5 py-4">{record.email || "—"}</td>
                     <td className="px-5 py-4">{record.phone || "—"}</td>
                     {isStudents && <td className="px-5 py-4">{record.course}</td>}
+                    {!isStudents && <td className="px-5 py-4">{(record.roles || []).join(", ")}</td>}
                     <td className="px-5 py-4 capitalize">{record.status}</td>
                     <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => editRecord(record)} className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                          Edit
-                        </button>
-                        {user.role === "superadmin" && (
+                      {user.role === "superadmin" && (
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => editRecord(record)} className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">
+                            Edit
+                          </button>
                           <button type="button" onClick={() => deleteRecord(record)} className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700">
                             Delete
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -249,7 +280,7 @@ const DirectoryPage = ({ kind }) => {
         )}
       </div>
       {user.role !== "superadmin" && (
-        <p className="mt-3 text-sm text-slate-600">Only a superadmin can delete profile records.</p>
+        <p className="mt-3 text-sm text-slate-600">Only a superadmin can edit or delete profile records.</p>
       )}
     </section>
   );

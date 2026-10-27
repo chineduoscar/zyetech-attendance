@@ -22,7 +22,7 @@ const AttendanceList = ({ type }) => {
   const [search, setSearch] = useState("");
   const title = isStaff ? "Staff Attendance" : "Student Attendance";
   const filteredRecords = records.filter((record) =>
-    `${record.name} ${record.course}`
+    `${record.student_number || record.staff_number || ""} ${record.name} ${record.course || ""}`
       .toLowerCase()
       .includes(search.trim().toLowerCase()),
   );
@@ -61,7 +61,7 @@ const AttendanceList = ({ type }) => {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name or course"
+            placeholder="Search by ID, name or course"
             className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus-visible:outline-2 focus-visible:outline-indigo-400"
           />
         </label>
@@ -101,11 +101,16 @@ const AttendanceList = ({ type }) => {
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-semibold">
-                    Name
+                    ID
                   </th>
                   <th scope="col" className="px-5 py-3 font-semibold">
-                    Course
+                    Name
                   </th>
+                  {!isStaff && (
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Course
+                    </th>
+                  )}
                   {!isStaff && (
                     <th scope="col" className="px-5 py-3 font-semibold">
                       Session
@@ -125,8 +130,11 @@ const AttendanceList = ({ type }) => {
                     key={record.id}
                     className="hover:bg-slate-50"
                   >
+                    <td className="px-5 py-4 font-semibold">
+                      {isStaff ? record.staff_number : record.student_number}
+                    </td>
                     <td className="px-5 py-4 font-medium">{record.name}</td>
-                    <td className="px-5 py-4">{record.course}</td>
+                    {!isStaff && <td className="px-5 py-4">{record.course}</td>}
                     {!isStaff && (
                       <td className="px-5 py-4">{record.session}</td>
                     )}

@@ -19,6 +19,27 @@ export const COURSES = [
   "Virtual Assistance",
 ];
 
+export const STAFF_ROLES = [
+  "AI Automation Specialist",
+  "Back End Developer",
+  "Front End Developer",
+  "Full Stack Web Developer",
+  "Cybersecurity Specialist",
+  "Data Analyst",
+  "Data Scientist",
+  "Digital Marketer",
+  "Content Creator",
+  "Graphics Designer",
+  "Product / UI/UX Designer",
+  "Video Editor",
+  "Generative AI / Video Animator",
+  "Virtual Assistant",
+  "Kiddies Bootcamp Instructor",
+  "Receptionist",
+  "Administrator",
+  "Other",
+];
+
 // Sidebar menu items. Each path is registered under the admin layout in App.jsx.
 export const NAV_ITEMS = [
   { key: "dashboard", label: "Home", icon: "home", path: "/admin/dashboard" },
@@ -52,6 +73,11 @@ export const NAV_ITEMS = [
     icon: "allReceipts",
     path: "/admin/receipts",
   },
-  { key: "students", label: "Students", icon: "students", path: "/admin/students" },
+  {
+    key: "students",
+    label: "Students",
+    icon: "students",
+    path: "/admin/students",
+  },
   { key: "staffs", label: "Staffs", icon: "staffs", path: "/admin/staff" },
 ];

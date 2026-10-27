@@ -22,8 +22,16 @@ const Dashboard = () => {
   }, [loadSummary]);
 
   const metrics = [
-    // { label: "Total students", value: summary?.total_students, detail: "Student profiles" },
-    // { label: "Total staff", value: summary?.total_staff, detail: "Staff profiles" },
+    {
+      label: "Total students",
+      value: summary?.total_students,
+      detail: "Student profiles",
+    },
+    {
+      label: "Total staff",
+      value: summary?.total_staff,
+      detail: "Staff profiles",
+    },
     {
       label: "Student attendance today",
       value: summary?.today?.student_attendance,
