@@ -76,6 +76,7 @@ const AdminLogin = () => {
               name="email"
               type="email"
               autoComplete="username"
+              placeholder="you@example.com"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -95,6 +96,7 @@ const AdminLogin = () => {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
+                placeholder="Enter your password"
                 required
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

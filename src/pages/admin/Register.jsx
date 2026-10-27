@@ -89,6 +89,7 @@ const Register = () => {
               id="register-name"
               name="name"
               autoComplete="name"
+              placeholder="Your full name"
               required
               maxLength={100}
               value={form.name}
@@ -108,6 +109,7 @@ const Register = () => {
               name="email"
               type="email"
               autoComplete="email"
+              placeholder="you@example.com"
               required
               value={form.email}
               onChange={updateField}
@@ -127,6 +129,7 @@ const Register = () => {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
+                placeholder="At least 6 characters"
                 minLength={6}
                 required
                 value={form.password}
