@@ -109,7 +109,7 @@ const StaffAttendance = () => {
               </p>
               <Link
                 to="/onboarding/staff"
-                className="shrink-0 rounded-lg border-[1.5px] border-[#06066f] bg-white px-3 py-1.5 text-xs font-semibold text-[#06066f] transition-colors hover:bg-[#eef0ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+                className="shrink-0 rounded-lg border-[1.5px] border-[#06066f] bg-white px-3 py-1.5 text-xs font-semibold text-[#06066f] transition-colors hover:bg-[#eef0ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
               >
                 Get your staff ID
               </Link>

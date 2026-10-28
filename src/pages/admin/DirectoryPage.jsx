@@ -6,7 +6,6 @@ import { COURSES, STAFF_ROLES } from "../../data/data";
 const emptyForm = {
   name: "",
   email: "",
-  phone: "",
   course: "",
   roles: [],
   status: "active",
@@ -76,7 +75,6 @@ const DirectoryPage = ({ kind }) => {
     setForm({
       name: record.name,
       email: record.email || "",
-      phone: record.phone || "",
       course: record.course || "",
       roles: record.roles || [],
       status: record.status,
@@ -154,16 +152,6 @@ const DirectoryPage = ({ kind }) => {
               autoComplete="email"
             />
           </label>
-          <label className="text-sm font-semibold">
-            Phone
-            <input
-              type="tel"
-              value={form.phone}
-              onChange={(event) => setForm({ ...form, phone: event.target.value })}
-              className={`${inputClass} mt-1.5`}
-              autoComplete="tel"
-            />
-          </label>
           {isStudents && (
             <label className="text-sm font-semibold">
               Course
@@ -237,13 +225,12 @@ const DirectoryPage = ({ kind }) => {
           <p className="px-5 py-12 text-center text-sm text-slate-600">No {title.toLowerCase()} records yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm">
+            <table className="w-full min-w-175 text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-semibold">ID</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Name</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Email</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Phone</th>
                   {isStudents && <th scope="col" className="px-5 py-3 font-semibold">Course</th>}
                   {!isStudents && <th scope="col" className="px-5 py-3 font-semibold">Roles</th>}
                   <th scope="col" className="px-5 py-3 font-semibold">Status</th>
@@ -256,7 +243,6 @@ const DirectoryPage = ({ kind }) => {
                     <td className="px-5 py-4 font-semibold">{isStudents ? record.student_number : record.staff_number}</td>
                     <td className="px-5 py-4 font-medium">{record.name}</td>
                     <td className="px-5 py-4">{record.email || "—"}</td>
-                    <td className="px-5 py-4">{record.phone || "—"}</td>
                     {isStudents && <td className="px-5 py-4">{record.course}</td>}
                     {!isStudents && <td className="px-5 py-4">{(record.roles || []).join(", ")}</td>}
                     <td className="px-5 py-4 capitalize">{record.status}</td>
