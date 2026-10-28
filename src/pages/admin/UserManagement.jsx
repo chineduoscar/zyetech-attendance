@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, apiRequest } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const displayDate = (date) =>
   new Date(date).toLocaleDateString("en-GB", {
@@ -16,6 +17,7 @@ const UserManagement = () => {
   const [savingId, setSavingId] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [pendingConfirmation, setPendingConfirmation] = useState(null);
   const isSuperadmin = currentUser.role === "superadmin";
 
   const loadUsers = useCallback(async () => {
@@ -42,8 +44,7 @@ const UserManagement = () => {
     loadUsers();
   }, [loadUsers]);
 
-  const updateUser = async (targetUser, operation, payload, confirmation) => {
-    if (confirmation && !window.confirm(confirmation)) return;
+  const performUserUpdate = async (targetUser, operation, payload) => {
     setError("");
     setMessage("");
     setSavingId(targetUser.id);
@@ -68,8 +69,39 @@ const UserManagement = () => {
     }
   };
 
+  const updateUser = (targetUser, operation, payload, confirmation) => {
+    if (confirmation) {
+      setPendingConfirmation({
+        targetUser,
+        operation,
+        payload,
+        message: confirmation,
+      });
+      return;
+    }
+
+    performUserUpdate(targetUser, operation, payload);
+  };
+
+  const confirmUserUpdate = () => {
+    if (!pendingConfirmation) return;
+
+    const { targetUser, operation, payload } = pendingConfirmation;
+    setPendingConfirmation(null);
+    performUserUpdate(targetUser, operation, payload);
+  };
+
   return (
     <section>
+      {pendingConfirmation && (
+        <ConfirmationModal
+          title="Confirm user role change"
+          message={pendingConfirmation.message}
+          confirmLabel="Continue"
+          onCancel={() => setPendingConfirmation(null)}
+          onConfirm={confirmUserUpdate}
+        />
+      )}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
