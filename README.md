@@ -84,7 +84,7 @@ For cross-site deployments, the browser must be allowed to send credentialed req
 
 ## Database-backed app pages
 
-The backend creates the application tables when it starts. Students, staff, attendance submissions, receipts, and administrator accounts are stored in PostgreSQL and are shared across browsers and devices.
+The backend creates the application tables when it starts. Students, staff, attendance submissions, receipts created through the backend API, and administrator accounts are stored in PostgreSQL and are shared across browsers and devices. The `/admin/receipts/generate` page currently generates a downloadable PDF in the browser only; it does not submit or save payment data.
 
 | Admin page | Data |
 | --- | --- |
@@ -93,7 +93,7 @@ The backend creates the application tables when it starts. Students, staff, atte
 | `/admin/staff` | Create, edit, and list staff profiles (name, email, phone, status) |
 | `/admin/attendance/students` | Student attendance submitted by the public student form |
 | `/admin/attendance/staff` | Staff attendance submitted by the public staff form |
-| `/admin/receipts/generate` | Save a payment for an active student and generate a receipt number |
+| `/admin/receipts/generate` | Generate and download a payment receipt locally; not persisted |
 | `/admin/receipts` | Browse saved receipts |
 | `/admin/users` | Approve accounts and manage administrator roles |
 
