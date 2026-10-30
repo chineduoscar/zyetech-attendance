@@ -16,7 +16,18 @@ const LoadingScreen = ({ error, onRetry }) => (
           </button>
         </>
       ) : (
-        <p role="status">Checking your session…</p>
+        <div
+          role="status"
+          aria-label="Checking your session"
+          className="flex items-center justify-center"
+        >
+          <img
+            src="/logo.png"
+            alt=""
+            aria-hidden="true"
+            className="h-20 w-20 animate-pulse object-contain"
+          />
+        </div>
       )}
     </div>
   </main>
