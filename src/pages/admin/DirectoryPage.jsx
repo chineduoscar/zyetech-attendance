@@ -24,7 +24,22 @@ const DirectoryPage = ({ kind }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
   const [recordToDelete, setRecordToDelete] = useState(null);
+  const filteredRecords = records.filter((record) =>
+    [
+      isStudents ? record.student_number : record.staff_number,
+      record.name,
+      record.email,
+      record.course,
+      ...(record.roles || []),
+      record.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(search.trim().toLowerCase()),
+  );
 
   const loadRecords = useCallback(async () => {
     try {
@@ -128,7 +143,7 @@ const DirectoryPage = ({ kind }) => {
           onConfirm={confirmDeleteRecord}
         />
       )}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="mt-2 text-sm text-[#4a4d85]">
@@ -143,7 +158,7 @@ const DirectoryPage = ({ kind }) => {
             loadRecords();
           }}
           disabled={loading}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60 sm:w-auto"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>
@@ -266,11 +281,11 @@ const DirectoryPage = ({ kind }) => {
             </label>
           )}
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[#06066f] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            className="min-h-11 rounded-lg bg-[#06066f] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60 sm:w-auto"
           >
             {saving
               ? "Saving…"
@@ -281,7 +296,7 @@ const DirectoryPage = ({ kind }) => {
           <button
             type="button"
             onClick={resetForm}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700"
+            className="min-h-11 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 sm:w-auto"
           >
             {editingId ? "Cancel" : "Clear"}
           </button>
@@ -289,6 +304,24 @@ const DirectoryPage = ({ kind }) => {
       </form>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <h2 className="font-semibold text-slate-900">
+            {title} records
+            <span className="ml-2 text-sm font-normal text-slate-500">
+              {filteredRecords.length}
+            </span>
+          </h2>
+          <label className="w-full sm:max-w-sm">
+            <span className="sr-only">Search {title.toLowerCase()}</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={`Search ${isStudents ? "students" : "staff"} by name, ID, email${isStudents ? " or course" : ""}`}
+              className={inputClass}
+            />
+          </label>
+        </div>
         {loading ? (
           <p
             role="status"
@@ -300,8 +333,77 @@ const DirectoryPage = ({ kind }) => {
           <p className="px-5 py-12 text-center text-sm text-slate-600">
             No {title.toLowerCase()} records yet.
           </p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="px-5 py-12 text-center text-sm text-slate-600">
+            No {title.toLowerCase()} match your search.
+          </p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="space-y-3 p-3 xl:hidden">
+              {filteredRecords.map((record) => (
+                <article
+                  key={record.id}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-semibold text-slate-900">
+                        {record.name}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-slate-500">
+                        {isStudents ? record.student_number : record.staff_number}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                        record.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {record.status}
+                    </span>
+                  </div>
+                  <dl className="mt-4 space-y-3 text-sm">
+                    <div className="min-w-0">
+                      <dt className="text-xs text-slate-500">Email</dt>
+                      <dd className="mt-0.5 break-all text-slate-800">
+                        {record.email || "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-slate-500">
+                        {isStudents ? "Course" : "Roles"}
+                      </dt>
+                      <dd className="mt-0.5 break-words text-slate-800">
+                        {isStudents
+                          ? record.course
+                          : (record.roles || []).join(", ") || "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                  {user.role === "superadmin" && (
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => editRecord(record)}
+                        className="min-h-11 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteRecord(record)}
+                        className="min-h-11 flex-1 rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-175 text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
@@ -333,7 +435,7 @@ const DirectoryPage = ({ kind }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
-                {records.map((record) => (
+                {filteredRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-slate-50">
                     <td className="px-5 py-4 font-semibold">
                       {isStudents ? record.student_number : record.staff_number}
@@ -373,7 +475,8 @@ const DirectoryPage = ({ kind }) => {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
       {user.role !== "superadmin" && (

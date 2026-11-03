@@ -25,7 +25,9 @@ Copy `.env.example` to `.env`, then set `DATABASE_URL` and a long random `JWT_SE
 npm run dev
 ```
 
-The backend applies database table changes during startup and listens on port `3000` by default.
+The backend applies database table changes during startup and listens on port `3000` by default. Interactive Swagger documentation is available at `http://localhost:3000/api-docs`, with the OpenAPI JSON at `http://localhost:3000/api-docs.json`.
+
+The backend uses Winston to write structured JSON logs to standard output. Set `LOG_LEVEL` to `error`, `warn`, `info` (default), `http`, `verbose`, `debug`, or `silly` to control verbosity. Each HTTP request log includes its request ID, method, path, status, duration, and authenticated user ID/role when available. The response `X-Request-Id` header can be used to find the corresponding log entry. Errors include stack details; credentials, request bodies, and query strings are not logged. In local development, view the backend terminal; in production, use the hosting provider's application logs.
 
 ### 2. Configure and start the frontend
 

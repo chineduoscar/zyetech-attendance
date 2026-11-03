@@ -59,7 +59,7 @@ const Dashboard = () => {
           year: "numeric",
         })}
       </p>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
             Welcome to your dashboard
@@ -76,7 +76,7 @@ const Dashboard = () => {
             loadSummary();
           }}
           disabled={loading}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60 sm:w-auto"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>

@@ -91,6 +91,89 @@ const UserManagement = () => {
     performUserUpdate(targetUser, operation, payload);
   };
 
+  const getUserActions = (account) => {
+    const isSelf = account.id === currentUser.id;
+    const saving = savingId === account.id;
+    const actions = [];
+    const addAction = (label, style, operation, payload, confirmation) => {
+      actions.push({
+        label: saving ? "Saving…" : label,
+        style,
+        onClick: () =>
+          updateUser(account, operation, payload, confirmation),
+      });
+    };
+
+    if (!isSelf && account.approval_status === "pending") {
+      addAction(
+        "Approve",
+        "bg-green-700 text-white hover:bg-green-800",
+        "approval",
+        { approval_status: "approved" },
+      );
+    }
+    if (
+      !isSelf &&
+      account.approval_status === "approved" &&
+      account.role === "user"
+    ) {
+      addAction(
+        "Make admin",
+        "bg-[#06066f] text-white hover:bg-[#04044f]",
+        "role",
+        { role: "admin" },
+        `Promote ${account.name} to admin? This grants access to the admin dashboard.`,
+      );
+    }
+    if (
+      !isSelf &&
+      account.approval_status === "approved" &&
+      account.role === "admin"
+    ) {
+      addAction(
+        "Make superadmin",
+        "bg-indigo-700 text-white hover:bg-indigo-800",
+        "role",
+        { role: "superadmin" },
+        `Promote ${account.name} to superadmin? This grants full user-management privileges.`,
+      );
+    }
+    if (!isSelf && account.role === "admin") {
+      addAction(
+        "Revoke admin",
+        "border border-red-300 text-red-700 hover:bg-red-50",
+        "role",
+        { role: "user" },
+        `Revoke admin access for ${account.name}?`,
+      );
+    }
+    if (!isSelf && account.role === "superadmin") {
+      addAction(
+        "Revoke superadmin",
+        "border border-red-300 text-red-700 hover:bg-red-50",
+        "role",
+        { role: "admin" },
+        `Remove superadmin privileges from ${account.name}?`,
+      );
+    }
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {actions.map((action) => (
+          <button
+            key={action.label}
+            type="button"
+            disabled={saving}
+            onClick={action.onClick}
+            className={`min-h-11 rounded-md px-3 py-2 text-xs font-semibold disabled:opacity-60 ${action.style}`}
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <section>
       {pendingConfirmation && (
@@ -102,7 +185,7 @@ const UserManagement = () => {
           onConfirm={confirmUserUpdate}
         />
       )}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
           <p className="mt-2 text-sm text-slate-600">
@@ -113,7 +196,7 @@ const UserManagement = () => {
           type="button"
           onClick={loadUsers}
           disabled={loading}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 sm:w-auto"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>
@@ -140,7 +223,54 @@ const UserManagement = () => {
             No registered users found.
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="space-y-3 p-3 xl:hidden">
+              {users.map((account) => (
+                <article
+                  key={account.id}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-semibold text-slate-900">
+                        {account.name}
+                        {account.id === currentUser.id && (
+                          <span className="ml-1 text-xs font-normal text-slate-500">
+                            (you)
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-1 break-all text-sm text-slate-600">
+                        {account.email}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        account.approval_status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-amber-100 text-amber-800"
+                      }`}
+                    >
+                      {account.approval_status}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                    <p className="text-slate-700">
+                      Role: <span className="font-semibold capitalize">{account.role}</span>
+                    </p>
+                    <p className="text-slate-600">
+                      Registered {displayDate(account.created_at)}
+                    </p>
+                  </div>
+                  {isSuperadmin && (
+                    <div className="mt-4 border-t border-slate-100 pt-3">
+                      {getUserActions(account)}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[850px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
@@ -157,7 +287,6 @@ const UserManagement = () => {
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 {users.map((account) => {
                   const isSelf = account.id === currentUser.id;
-                  const saving = savingId === account.id;
                   return (
                     <tr key={account.id} className="align-top hover:bg-slate-50">
                       <td className="px-5 py-4 font-medium">
@@ -178,82 +307,7 @@ const UserManagement = () => {
                       <td className="px-5 py-4">{displayDate(account.created_at)}</td>
                       {isSuperadmin && (
                         <td className="px-5 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            {!isSelf && account.approval_status === "pending" && (
-                              <button
-                                type="button"
-                                disabled={saving}
-                                onClick={() => updateUser(
-                                  account,
-                                  "approval",
-                                  { approval_status: "approved" },
-                                )}
-                                className="rounded-md bg-green-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-800 disabled:opacity-60"
-                              >
-                                {saving ? "Saving…" : "Approve"}
-                              </button>
-                            )}
-                            {!isSelf && account.approval_status === "approved" && account.role === "user" && (
-                              <button
-                                type="button"
-                                disabled={saving}
-                                onClick={() => updateUser(
-                                  account,
-                                  "role",
-                                  { role: "admin" },
-                                  `Promote ${account.name} to admin? This grants access to the admin dashboard.`,
-                                )}
-                                className="rounded-md bg-[#06066f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#04044f] disabled:opacity-60"
-                              >
-                                {saving ? "Saving…" : "Make admin"}
-                              </button>
-                            )}
-                            {!isSelf && account.approval_status === "approved" && account.role === "admin" && (
-                              <button
-                                type="button"
-                                disabled={saving}
-                                onClick={() => updateUser(
-                                  account,
-                                  "role",
-                                  { role: "superadmin" },
-                                  `Promote ${account.name} to superadmin? This grants full user-management privileges.`,
-                                )}
-                                className="rounded-md bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-800 disabled:opacity-60"
-                              >
-                                {saving ? "Saving…" : "Make superadmin"}
-                              </button>
-                            )}
-                            {!isSelf && account.role === "admin" && (
-                              <button
-                                type="button"
-                                disabled={saving}
-                                onClick={() => updateUser(
-                                  account,
-                                  "role",
-                                  { role: "user" },
-                                  `Revoke admin access for ${account.name}?`,
-                                )}
-                                className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
-                              >
-                                {saving ? "Saving…" : "Revoke admin"}
-                              </button>
-                            )}
-                            {!isSelf && account.role === "superadmin" && (
-                              <button
-                                type="button"
-                                disabled={saving}
-                                onClick={() => updateUser(
-                                  account,
-                                  "role",
-                                  { role: "admin" },
-                                  `Remove superadmin privileges from ${account.name}?`,
-                                )}
-                                className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
-                              >
-                                {saving ? "Saving…" : "Revoke superadmin"}
-                              </button>
-                            )}
-                          </div>
+                          {getUserActions(account)}
                         </td>
                       )}
                     </tr>
@@ -261,7 +315,8 @@ const UserManagement = () => {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
       {!isSuperadmin && (

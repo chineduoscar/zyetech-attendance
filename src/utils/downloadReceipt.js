@@ -1,19 +1,25 @@
 import jsPDF from "jspdf";
 
-const loadImageAsBase64 = (url) =>
+const loadImageAsBase64 = (url, maxDimension) =>
   new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
+      const scale = Math.min(
+        1,
+        maxDimension / Math.max(image.naturalWidth, image.naturalHeight),
+      );
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
       const context = canvas.getContext("2d");
       if (!context) {
         reject(new Error("Unable to prepare the receipt image."));
         return;
       }
-      context.drawImage(image, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.65));
     };
     image.onerror = () => reject(new Error(`Unable to load ${url}.`));
     image.src = url;
@@ -37,7 +43,12 @@ export const generatePDFReceipt = async (data, { download = true } = {}) => {
     receiptNumber,
     receiptDate,
   } = data;
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({
+    unit: "pt",
+    format: "a4",
+    compress: true,
+    putOnlyUsedFonts: true,
+  });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 40;
@@ -47,8 +58,8 @@ export const generatePDFReceipt = async (data, { download = true } = {}) => {
   const gray = [100, 110, 120];
   let y = 40;
 
-  const logo = await loadImageAsBase64("/logo.png");
-  doc.addImage(logo, "PNG", pageWidth - margin - 50, y, 50, 50);
+  const logo = await loadImageAsBase64("/logo.png", 256);
+  doc.addImage(logo, "JPEG", pageWidth - margin - 50, y, 50, 50);
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
@@ -235,8 +246,8 @@ export const generatePDFReceipt = async (data, { download = true } = {}) => {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text("Emmanuel Majekodunmi", signatureX, sectionTop + 16);
-  const signature = await loadImageAsBase64("/sign.png");
-  doc.addImage(signature, "PNG", signatureX, sectionTop + 22, 130, 45);
+  const signature = await loadImageAsBase64("/sign.png", 520);
+  doc.addImage(signature, "JPEG", signatureX, sectionTop + 22, 130, 45);
   doc.line(signatureX, sectionTop + 75, pageWidth - margin, sectionTop + 75);
   doc.setFontSize(8.5);
   doc.text("Signature", signatureX, sectionTop + 87);

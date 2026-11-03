@@ -47,7 +47,7 @@ const AttendanceList = ({ type }) => {
 
   return (
     <section>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="mt-2 text-sm text-[#4a4d85]">
@@ -73,7 +73,7 @@ const AttendanceList = ({ type }) => {
             loadRecords();
           }}
           disabled={loading}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-60 sm:w-auto"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>
@@ -96,7 +96,49 @@ const AttendanceList = ({ type }) => {
             Loading attendance…
           </p>
         ) : error ? null : filteredRecords.length ? (
-          <div className="overflow-x-auto">
+          <>
+            <div className="space-y-3 p-3 xl:hidden">
+              {filteredRecords.map((record) => (
+                <article
+                  key={record.id}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-semibold text-slate-900">
+                        {record.name}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-slate-500">
+                        {isStaff ? record.staff_number : record.student_number}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-right text-xs font-medium text-slate-600">
+                      {formatDate(record.time)}
+                    </p>
+                  </div>
+                  {!isStaff && (
+                    <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="min-w-0">
+                        <dt className="text-xs text-slate-500">Course</dt>
+                        <dd className="mt-0.5 break-words text-slate-800">
+                          {record.course || "—"}
+                        </dd>
+                      </div>
+                      <div className="min-w-0">
+                        <dt className="text-xs text-slate-500">Session</dt>
+                        <dd className="mt-0.5 break-words text-slate-800">
+                          {record.session || "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  )}
+                  <p className="mt-3 text-xs text-slate-500">
+                    Recorded at {formatTime(record.time)}
+                  </p>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-155 text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
@@ -144,7 +186,8 @@ const AttendanceList = ({ type }) => {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         ) : (
           <p className="px-5 py-12 text-center text-sm text-slate-600">
             {search
