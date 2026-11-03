@@ -120,13 +120,23 @@ const AllReceipts = () => {
                     </div>
                   </dl>
                   {receipt.image_url ? (
-                    <a
-                      href={getDownloadUrl(receipt.image_url)}
-                      download={getFileName(receipt.receipt_number)}
-                      className="mt-4 flex min-h-11 w-full items-center justify-center rounded-lg bg-[#06066f] px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      Download receipt
-                    </a>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <a
+                        href={receipt.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex min-h-11 items-center justify-center rounded-lg border border-[#06066f] px-3 py-2 text-sm font-semibold text-[#06066f]"
+                      >
+                        View receipt
+                      </a>
+                      <a
+                        href={getDownloadUrl(receipt.image_url)}
+                        download={getFileName(receipt.receipt_number)}
+                        className="flex min-h-11 items-center justify-center rounded-lg bg-[#06066f] px-3 py-2 text-sm font-semibold text-white"
+                      >
+                        Download
+                      </a>
+                    </div>
                   ) : (
                     <p className="mt-4 text-center text-sm text-slate-400">
                       Receipt file unavailable
@@ -169,13 +179,23 @@ const AllReceipts = () => {
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
                         {receipt.image_url ? (
-                          <a
-                            href={getDownloadUrl(receipt.image_url)}
-                            download={getFileName(receipt.receipt_number)}
-                            className="font-semibold text-[#06066f] underline"
-                          >
-                            Download PDF
-                          </a>
+                          <div className="flex items-center gap-3">
+                            <a
+                              href={receipt.image_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-[#06066f] underline"
+                            >
+                              View
+                            </a>
+                            <a
+                              href={getDownloadUrl(receipt.image_url)}
+                              download={getFileName(receipt.receipt_number)}
+                              className="font-semibold text-[#06066f] underline"
+                            >
+                              Download
+                            </a>
+                          </div>
                         ) : (
                           <span className="text-slate-400">No file</span>
                         )}
