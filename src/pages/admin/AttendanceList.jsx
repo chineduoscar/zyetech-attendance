@@ -1,8 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "../../api/client";
 
-const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-GB", {
+const getLocalDate = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getAttendanceDay = (record) => {
+  if (record.attendance_date) {
+    return String(record.attendance_date).slice(0, 10);
+  }
+  const date = new Date(record.created_at);
+  return Number.isNaN(date.getTime()) ? "" : getLocalDate(date);
+};
+
+const formatDate = (value) =>
+  new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -20,12 +35,18 @@ const AttendanceList = ({ type }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [dayFilter, setDayFilter] = useState("day");
+  const [selectedDay, setSelectedDay] = useState(() => getLocalDate());
   const title = isStaff ? "Staff Attendance" : "Student Attendance";
-  const filteredRecords = records.filter((record) =>
-    `${record.student_number || record.staff_number || ""} ${record.name} ${record.course || ""}`
-      .toLowerCase()
-      .includes(search.trim().toLowerCase()),
-  );
+  const filteredRecords = records.filter((record) => {
+    const matchesDay =
+      dayFilter === "all" || getAttendanceDay(record) === selectedDay;
+    const matchesSearch =
+      `${record.student_number || record.staff_number || ""} ${record.name} ${record.course || ""}`
+        .toLowerCase()
+        .includes(search.trim().toLowerCase());
+    return matchesDay && matchesSearch;
+  });
 
   const loadRecords = useCallback(async () => {
     try {
@@ -51,9 +72,36 @@ const AttendanceList = ({ type }) => {
         <div>
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="mt-2 text-sm text-[#4a4d85]">
-            View attendance records submitted by{" "}
-            {isStaff ? "staff" : "students"}.
+            View attendance records submitted by {isStaff ? "staff" : "students"}.
           </p>
+        </div>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-end">
+          <label className="w-full sm:w-auto">
+            <span className="mb-1.5 block text-xs font-semibold text-slate-600">
+              Show
+            </span>
+            <select
+              value={dayFilter}
+              onChange={(event) => setDayFilter(event.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus-visible:outline-2 focus-visible:outline-indigo-400 sm:min-w-36"
+            >
+              <option value="day">Selected day</option>
+              <option value="all">All days</option>
+            </select>
+          </label>
+          {dayFilter === "day" && (
+            <label className="w-full sm:w-auto">
+              <span className="mb-1.5 block text-xs font-semibold text-slate-600">
+                Attendance day
+              </span>
+              <input
+                type="date"
+                value={selectedDay}
+                onChange={(event) => setSelectedDay(event.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus-visible:outline-2 focus-visible:outline-indigo-400"
+              />
+            </label>
+          )}
         </div>
         <label className="w-full sm:max-w-xs">
           <span className="sr-only">Search attendance records</span>
@@ -113,7 +161,7 @@ const AttendanceList = ({ type }) => {
                       </p>
                     </div>
                     <p className="shrink-0 text-right text-xs font-medium text-slate-600">
-                      {formatDate(record.time)}
+                      {formatDate(record.attendance_date || record.time)}
                     </p>
                   </div>
                   {!isStaff && (
@@ -180,7 +228,9 @@ const AttendanceList = ({ type }) => {
                     {!isStaff && (
                       <td className="px-5 py-4">{record.session}</td>
                     )}
-                    <td className="px-5 py-4">{formatDate(record.time)}</td>
+                    <td className="px-5 py-4">
+                      {formatDate(record.attendance_date || record.time)}
+                    </td>
                     <td className="px-5 py-4">{formatTime(record.time)}</td>
                   </tr>
                 ))}
@@ -191,8 +241,10 @@ const AttendanceList = ({ type }) => {
         ) : (
           <p className="px-5 py-12 text-center text-sm text-slate-600">
             {search
-              ? "No attendance records match your search."
-              : "No attendance has been recorded yet."}
+              ? "No attendance records match your filters."
+              : dayFilter === "day"
+                ? "No attendance records for this day."
+                : "No attendance has been recorded yet."}
           </p>
         )}
       </div>

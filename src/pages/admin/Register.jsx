@@ -35,7 +35,7 @@ const Register = () => {
       });
       navigate(
         ["admin", "superadmin"].includes(user.role)
-          ? "/admin/users"
+          ? "/admin/dashboard"
           : "/pending-approval",
         { replace: true },
       );

@@ -125,7 +125,10 @@ const Sidebar = ({
 
       {user && ["admin", "superadmin"].includes(user.role) && (
         <nav aria-label="Admin" className="flex flex-col gap-1 px-3 py-4">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter(
+            (item) =>
+              item.key !== "user-management" || user.role === "superadmin",
+          ).map((item) => (
             <NavLink
               key={item.key}
               to={item.path}

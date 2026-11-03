@@ -48,6 +48,28 @@ export const AdminRoute = () => {
   return <Outlet />;
 };
 
+export const SuperadminRoute = () => {
+  const { user, loading, sessionError, refreshSession } = useAuth();
+  const location = useLocation();
+  if (loading || sessionError) {
+    return <LoadingScreen error={sessionError} onRetry={refreshSession} />;
+  }
+  if (!user) {
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
+  }
+  if (user.role !== "superadmin") {
+    return (
+      <Navigate
+        to={
+          user.role === "admin" ? "/admin/dashboard" : "/pending-approval"
+        }
+        replace
+      />
+    );
+  }
+  return <Outlet />;
+};
+
 export const SignedInRoute = () => {
   const { user, loading, sessionError, refreshSession } = useAuth();
   if (loading || sessionError) {
@@ -55,7 +77,7 @@ export const SignedInRoute = () => {
   }
   if (!user) return <Navigate to="/admin/login" replace />;
   if (["admin", "superadmin"].includes(user.role)) {
-    return <Navigate to="/admin/users" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
   return <Outlet />;
 };
@@ -69,7 +91,7 @@ export const AuthPageRoute = () => {
     return (
       <Navigate
         to={["admin", "superadmin"].includes(user.role)
-          ? "/admin/users"
+          ? "/admin/dashboard"
           : "/pending-approval"}
         replace
       />

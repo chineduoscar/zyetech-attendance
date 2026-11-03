@@ -5,7 +5,12 @@ import {
   Routes,
 } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
-import { AdminRoute, AuthPageRoute, SignedInRoute } from "./auth/RouteGuards";
+import {
+  AdminRoute,
+  AuthPageRoute,
+  SignedInRoute,
+  SuperadminRoute,
+} from "./auth/RouteGuards";
 import DashboardLayout from "./layouts/DashboardLayout";
 import MainLayout from "./layouts/MainLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -57,7 +62,9 @@ function App() {
               <Route path="receipts" element={<AllReceipts />} />
               <Route path="students" element={<Students />} />
               <Route path="staff" element={<Staff />} />
-              <Route path="users" element={<UserManagement />} />
+              <Route element={<SuperadminRoute />}>
+                <Route path="users" element={<UserManagement />} />
+              </Route>
               <Route
                 path="*"
                 element={<Navigate to="/admin/dashboard" replace />}
