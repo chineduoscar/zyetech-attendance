@@ -24,7 +24,13 @@ const Spinner = () => (
   </svg>
 );
 
-const ReceiptSuccessView = ({ onReset, onDownload, studentName, course }) => {
+const ReceiptSuccessView = ({
+  onReset,
+  onDownload,
+  studentName,
+  course,
+  receiptImageUrl,
+}) => {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [shareUrl, setShareUrl] = useState("");
@@ -112,10 +118,20 @@ const ReceiptSuccessView = ({ onReset, onDownload, studentName, course }) => {
           Your receipt is ready
         </h2>
         <p className="text-sm text-slate-500">
-          Download the PDF or share it through WhatsApp. It is not saved in the
-          app.
+          Your receipt is saved. Download the PDF or share it through WhatsApp.
         </p>
       </div>
+
+      {receiptImageUrl && (
+        <a
+          href={receiptImageUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mb-4 block text-sm font-semibold text-[#06066f] underline"
+        >
+          View saved receipt
+        </a>
+      )}
 
       {error && (
         <p

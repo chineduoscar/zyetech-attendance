@@ -19,7 +19,7 @@ const loadImageAsBase64 = (url) =>
     image.src = url;
   });
 
-export const generatePDFReceipt = async (data) => {
+export const generatePDFReceipt = async (data, { download = true } = {}) => {
   const {
     studentName,
     studentPhone,
@@ -247,9 +247,13 @@ export const generatePDFReceipt = async (data) => {
   doc.text("Thank You For", margin, footerY);
   doc.text("Your Payment!", margin, footerY + 15);
 
-  doc.save(
-    hasReceiptNumber
-      ? `zyetech-receipt-${receiptNumber}.pdf`
-      : "zyetech-receipt-general.pdf",
-  );
+  const blob = doc.output("blob");
+  if (download) {
+    doc.save(
+      hasReceiptNumber
+        ? `zyetech-receipt-${receiptNumber}.pdf`
+        : "zyetech-receipt-general.pdf",
+    );
+  }
+  return blob;
 };

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { customAlphabet } from "nanoid";
+import { apiRequest } from "../../api/client";
 import { COURSES } from "../../data/data";
 import ReceiptSuccessView from "../../components/ReceiptSuccessView";
+import { generatePDFReceipt } from "../../utils/downloadReceipt";
 
 const generateReceiptId = customAlphabet(
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -27,8 +29,26 @@ const getInitialDate = () =>
 
 const getReceiptNumber = () => `PR-${generateReceiptId()}`;
 
+const blobToDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Unable to prepare the receipt for saving."));
+      }
+    };
+    reader.onerror = () =>
+      reject(reader.error || new Error("Unable to prepare the receipt for saving."));
+    reader.readAsDataURL(blob);
+  });
+
 const GenerateReceipt = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [receiptImageUrl, setReceiptImageUrl] = useState("");
   const [studentName, setStudentName] = useState("");
   const [studentPhone, setStudentPhone] = useState("");
   const [course, setCourse] = useState(COURSES[0]);
@@ -78,18 +98,50 @@ const GenerateReceipt = () => {
     receiptDate,
   });
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsSubmitted(true);
+    setSaving(true);
+    setSaveError("");
+    try {
+      const receiptData = getReceiptData();
+      const receiptPdf = await generatePDFReceipt(receiptData, {
+        download: false,
+      });
+      const imageData = await blobToDataUrl(receiptPdf);
+      const response = await apiRequest("/api/receipts", {
+        method: "POST",
+        body: JSON.stringify({
+          student_name: receiptData.studentName,
+          course: receiptData.course,
+          amount: receiptData.amountPaid,
+          purpose:
+            paymentPlan === "Installment"
+              ? `${course} (${currentStage} Installment)`
+              : course,
+          payment_date: new Date().toISOString().slice(0, 10),
+          receipt_number: receiptData.receiptNumber || undefined,
+          payment_method: paymentMethod,
+          details: receiptData,
+          image_data: imageData,
+        }),
+      });
+      setReceiptImageUrl(response.data.receipt.image_url || "");
+      setIsSubmitted(true);
+    } catch (requestError) {
+      setSaveError(requestError.message || "Unable to save the receipt.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDownload = async () => {
-    const { generatePDFReceipt } = await import("../../utils/downloadReceipt");
     await generatePDFReceipt(getReceiptData());
   };
 
   const resetForm = () => {
     setIsSubmitted(false);
+    setSaveError("");
+    setReceiptImageUrl("");
     setStudentName("");
     setStudentPhone("");
     setCourse(COURSES[0]);
@@ -114,6 +166,7 @@ const GenerateReceipt = () => {
         onDownload={handleDownload}
         studentName={studentName}
         course={course}
+        receiptImageUrl={receiptImageUrl}
       />
     );
   }
@@ -126,6 +179,14 @@ const GenerateReceipt = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {saveError && (
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
+              {saveError}
+            </p>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Student Name">
               <input
@@ -299,9 +360,10 @@ const GenerateReceipt = () => {
 
           <button
             type="submit"
-            className="w-full cursor-pointer rounded-lg bg-[#06066f] px-4 py-3 font-semibold text-white shadow transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#06066f] focus:ring-offset-2"
+            disabled={saving}
+            className="w-full cursor-pointer rounded-lg bg-[#06066f] px-4 py-3 font-semibold text-white shadow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#06066f] focus:ring-offset-2"
           >
-            Generate Receipt
+            {saving ? "Saving receipt..." : "Generate Receipt"}
           </button>
         </form>
       </div>
