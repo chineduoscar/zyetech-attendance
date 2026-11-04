@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "../../api/client";
+import { useAuth } from "../../auth/AuthContext";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -18,9 +20,14 @@ const getFileName = (receiptNumber) =>
   `${String(receiptNumber || "receipt").replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
 
 const AllReceipts = () => {
+  const { user } = useAuth();
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [receiptToDelete, setReceiptToDelete] = useState(null);
+  const [deletingReceiptId, setDeletingReceiptId] = useState("");
+  const isSuperadmin = user?.role === "superadmin";
 
   const loadReceipts = useCallback(async () => {
     try {
@@ -37,8 +44,40 @@ const AllReceipts = () => {
     void Promise.resolve().then(loadReceipts);
   }, [loadReceipts]);
 
+  const confirmDeleteReceipt = async () => {
+    if (!receiptToDelete) return;
+    const receipt = receiptToDelete;
+    setReceiptToDelete(null);
+    setError("");
+    setMessage("");
+    setDeletingReceiptId(receipt.id);
+    try {
+      const response = await apiRequest(`/api/receipts/${receipt.id}`, {
+        method: "DELETE",
+      });
+      setReceipts((current) =>
+        current.filter((item) => item.id !== receipt.id),
+      );
+      setMessage(response.message);
+    } catch (requestError) {
+      setError(requestError.message || "Unable to delete this receipt.");
+    } finally {
+      setDeletingReceiptId("");
+    }
+  };
+
   return (
     <section>
+      {receiptToDelete && (
+        <ConfirmationModal
+          title="Delete receipt"
+          message={`Permanently delete receipt ${receiptToDelete.receipt_number}? Its PDF will also be deleted from Cloudinary.`}
+          confirmLabel="Delete receipt"
+          destructive
+          onCancel={() => setReceiptToDelete(null)}
+          onConfirm={confirmDeleteReceipt}
+        />
+      )}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">All Receipts</h1>
@@ -66,6 +105,14 @@ const AllReceipts = () => {
           className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700"
         >
           {error}
+        </p>
+      )}
+      {message && (
+        <p
+          role="status"
+          className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800"
+        >
+          {message}
         </p>
       )}
 
@@ -142,6 +189,18 @@ const AllReceipts = () => {
                       Receipt file unavailable
                     </p>
                   )}
+                  {isSuperadmin && (
+                    <button
+                      type="button"
+                      onClick={() => setReceiptToDelete(receipt)}
+                      disabled={deletingReceiptId === receipt.id}
+                      className="mt-3 min-h-11 w-full rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 disabled:opacity-60"
+                    >
+                      {deletingReceiptId === receipt.id
+                        ? "Deleting…"
+                        : "Delete receipt"}
+                    </button>
+                  )}
                 </article>
               ))}
             </div>
@@ -156,6 +215,9 @@ const AllReceipts = () => {
                     <th scope="col" className="px-5 py-3">Date</th>
                     <th scope="col" className="px-5 py-3">Payment method</th>
                     <th scope="col" className="px-5 py-3">File</th>
+                    {isSuperadmin && (
+                      <th scope="col" className="px-5 py-3">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -200,6 +262,20 @@ const AllReceipts = () => {
                           <span className="text-slate-400">No file</span>
                         )}
                       </td>
+                      {isSuperadmin && (
+                        <td className="whitespace-nowrap px-5 py-4">
+                          <button
+                            type="button"
+                            onClick={() => setReceiptToDelete(receipt)}
+                            disabled={deletingReceiptId === receipt.id}
+                            className="font-semibold text-red-700 underline disabled:opacity-60"
+                          >
+                            {deletingReceiptId === receipt.id
+                              ? "Deleting…"
+                              : "Delete"}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

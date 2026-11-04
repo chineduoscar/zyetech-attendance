@@ -106,7 +106,7 @@ const UserManagement = () => {
 
     if (!isSelf && account.approval_status === "pending") {
       addAction(
-        "Approve",
+        account.role ? "Restore access" : "Approve",
         "bg-green-700 text-white hover:bg-green-800",
         "approval",
         { approval_status: "approved" },
@@ -115,14 +115,21 @@ const UserManagement = () => {
     if (
       !isSelf &&
       account.approval_status === "approved" &&
-      account.role === "user"
+      !account.role
     ) {
       addAction(
-        "Make admin",
+        "Assign admin",
         "bg-[#06066f] text-white hover:bg-[#04044f]",
         "role",
         { role: "admin" },
-        `Promote ${account.name} to admin? This grants access to the admin dashboard.`,
+        `Assign the admin role to ${account.name}? This grants access to the dashboard.`,
+      );
+      addAction(
+        "Assign superadmin",
+        "bg-indigo-700 text-white hover:bg-indigo-800",
+        "role",
+        { role: "superadmin" },
+        `Assign the superadmin role to ${account.name}? This grants full user-management privileges.`,
       );
     }
     if (
@@ -138,22 +145,37 @@ const UserManagement = () => {
         `Promote ${account.name} to superadmin? This grants full user-management privileges.`,
       );
     }
-    if (!isSelf && account.role === "admin") {
+    if (
+      !isSelf &&
+      account.approval_status === "approved" &&
+      account.role === "admin"
+    ) {
       addAction(
-        "Revoke admin",
+        "Suspend access",
         "border border-red-300 text-red-700 hover:bg-red-50",
-        "role",
-        { role: "user" },
-        `Revoke admin access for ${account.name}?`,
+        "approval",
+        { approval_status: "pending" },
+        `Suspend dashboard access for ${account.name}?`,
       );
     }
-    if (!isSelf && account.role === "superadmin") {
+    if (
+      !isSelf &&
+      account.approval_status === "approved" &&
+      account.role === "superadmin"
+    ) {
       addAction(
-        "Revoke superadmin",
+        "Make admin",
         "border border-red-300 text-red-700 hover:bg-red-50",
         "role",
         { role: "admin" },
-        `Remove superadmin privileges from ${account.name}?`,
+        `Remove superadmin privileges from ${account.name} and make them an admin?`,
+      );
+      addAction(
+        "Suspend access",
+        "border border-red-300 text-red-700 hover:bg-red-50",
+        "approval",
+        { approval_status: "pending" },
+        `Suspend dashboard access for ${account.name}?`,
       );
     }
 
@@ -256,7 +278,7 @@ const UserManagement = () => {
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                     <p className="text-slate-700">
-                      Role: <span className="font-semibold capitalize">{account.role}</span>
+                      Role: <span className="font-semibold capitalize">{account.role || "Unassigned"}</span>
                     </p>
                     <p className="text-slate-600">
                       Registered {displayDate(account.created_at)}
@@ -294,7 +316,7 @@ const UserManagement = () => {
                         {isSelf && <span className="ml-2 text-xs text-slate-500">(you)</span>}
                       </td>
                       <td className="px-5 py-4">{account.email}</td>
-                      <td className="px-5 py-4 capitalize">{account.role}</td>
+                      <td className="px-5 py-4 capitalize">{account.role || "Unassigned"}</td>
                       <td className="px-5 py-4">
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                           account.approval_status === "approved"

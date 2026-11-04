@@ -20,7 +20,8 @@ const AdminLogin = () => {
     try {
       const user = await login({ email: email.trim(), password });
       navigate(
-        ["admin", "superadmin"].includes(user.role)
+        user.approval_status === "approved" &&
+          ["admin", "superadmin"].includes(user.role)
           ? location.state?.from?.pathname || "/admin/dashboard"
           : "/pending-approval",
         { replace: true },

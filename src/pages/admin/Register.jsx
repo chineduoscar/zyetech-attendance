@@ -34,7 +34,8 @@ const Register = () => {
         password: form.password,
       });
       navigate(
-        ["admin", "superadmin"].includes(user.role)
+        user.approval_status === "approved" &&
+          ["admin", "superadmin"].includes(user.role)
           ? "/admin/dashboard"
           : "/pending-approval",
         { replace: true },

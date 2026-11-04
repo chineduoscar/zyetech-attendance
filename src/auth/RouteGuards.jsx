@@ -1,6 +1,10 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
+const hasDashboardAccess = (user) =>
+  user?.approval_status === "approved" &&
+  ["admin", "superadmin"].includes(user.role);
+
 const LoadingScreen = ({ error, onRetry }) => (
   <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 text-[#06066f]">
     <div className="text-center">
@@ -42,7 +46,7 @@ export const AdminRoute = () => {
   if (!user) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
-  if (!["admin", "superadmin"].includes(user.role)) {
+  if (!hasDashboardAccess(user)) {
     return <Navigate to="/pending-approval" replace />;
   }
   return <Outlet />;
@@ -57,7 +61,7 @@ export const SuperadminRoute = () => {
   if (!user) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
-  if (user.role !== "superadmin") {
+  if (!hasDashboardAccess(user) || user.role !== "superadmin") {
     return (
       <Navigate
         to={
@@ -76,7 +80,7 @@ export const SignedInRoute = () => {
     return <LoadingScreen error={sessionError} onRetry={refreshSession} />;
   }
   if (!user) return <Navigate to="/admin/login" replace />;
-  if (["admin", "superadmin"].includes(user.role)) {
+  if (hasDashboardAccess(user)) {
     return <Navigate to="/admin/dashboard" replace />;
   }
   return <Outlet />;
@@ -90,7 +94,7 @@ export const AuthPageRoute = () => {
   if (user) {
     return (
       <Navigate
-        to={["admin", "superadmin"].includes(user.role)
+        to={hasDashboardAccess(user)
           ? "/admin/dashboard"
           : "/pending-approval"}
         replace
