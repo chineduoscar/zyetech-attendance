@@ -138,7 +138,7 @@ const AllReceipts = () => {
                       <p className="break-all font-semibold text-slate-900">
                         {receipt.receipt_number}
                       </p>
-                      <p className="mt-1 break-words text-sm text-slate-700">
+                      <p className="mt-1 wrap-break-word text-sm text-slate-700">
                         {receipt.student_name}
                       </p>
                     </div>
@@ -149,7 +149,7 @@ const AllReceipts = () => {
                   <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
                     <div className="min-w-0">
                       <dt className="text-slate-500">Course</dt>
-                      <dd className="mt-1 break-words font-medium text-slate-800">
+                      <dd className="mt-1 wrap-break-word font-medium text-slate-800">
                         {receipt.course}
                       </dd>
                     </div>
