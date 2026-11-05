@@ -40,6 +40,12 @@ npm run dev
 
 Vite proxies `/api` requests to `http://localhost:3000`. Leave `VITE_API_BASE_URL` empty for local development. For a separately hosted API, set it to the API origin in the frontend environment.
 
+### Netlify and Render deployment
+
+The production frontend sends API requests to its own origin (`/api/...`). The `public/_redirects` rule proxies those requests to `https://zyetech-attendance-api.onrender.com`, keeping the browser and authentication cookie on the Netlify site instead of making cross-site API requests. Production builds intentionally ignore `VITE_API_BASE_URL`; do not set it to the Render URL in Netlify.
+
+In the Render backend environment, set `CORS_ORIGINS` to the exact public Netlify site origin (for example, `https://your-site.netlify.app`, without a trailing slash). Include additional frontend origins as a comma-separated list only if they should be allowed. Redeploy the frontend on Netlify and restart/redeploy the backend on Render after changing environment variables.
+
 ## First superadmin setup
 
 1. Start the backend and register the intended superadmin account through `/register`.
