@@ -29,6 +29,7 @@ import SignOut from "./pages/attendance/SignOut";
 import VerifyAttendance from "./pages/attendance/VerifyAttendance";
 import StaffOnboarding from "./pages/onboarding/StaffOnboarding";
 import StudentOnboarding from "./pages/onboarding/StudentOnboarding";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -44,6 +45,17 @@ function App() {
             <Route path="/pending-approval" element={<PendingApproval />} />
           </Route>
 
+          <Route
+            path="/admin/attendance/staff"
+            element={<NotFound />}
+          />
+          <Route
+            path="/admin/attendance/students"
+            element={<NotFound />}
+          />
+          <Route path="/attendance/staff" element={<NotFound />} />
+          <Route path="/attendance/students" element={<NotFound />} />
+
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<DashboardLayout />}>
               <Route
@@ -51,14 +63,6 @@ function App() {
                 element={<Navigate to="/admin/dashboard" replace />}
               />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route
-                path="attendance/staff"
-                element={<Navigate to="/admin/staff/attendance" replace />}
-              />
-              <Route
-                path="attendance/students"
-                element={<Navigate to="/admin/student/attendance" replace />}
-              />
               <Route
                 path="staff/attendance"
                 element={<AttendanceList type="staff" />}
@@ -76,20 +80,12 @@ function App() {
               </Route>
               <Route
                 path="*"
-                element={<Navigate to="/admin/dashboard" replace />}
+                element={<NotFound />}
               />
             </Route>
           </Route>
 
           <Route element={<MainLayout />}>
-            <Route
-              path="/attendance/staff"
-              element={<Navigate to="/staff/attendance" replace />}
-            />
-            <Route
-              path="/attendance/students"
-              element={<Navigate to="/student/attendance" replace />}
-            />
             <Route path="/staff/attendance" element={<StaffAttendance />} />
             <Route
               path="/staff/sign-out"
@@ -117,7 +113,7 @@ function App() {
           />
           <Route
             path="*"
-            element={<Navigate to="/admin/dashboard" replace />}
+            element={<NotFound />}
           />
         </Routes>
       </AuthProvider>
