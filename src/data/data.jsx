@@ -51,7 +51,7 @@ export const NAV_ITEMS = [
   },
   {
     key: "staff-attendance",
-    label: "staff/attendance",
+    label: "staff Attendance",
     icon: "staffAttendance",
     path: "/admin/staff/attendance",
   },
