@@ -285,6 +285,12 @@ const StudentAttendance = () => {
           >
             {saving ? "Saving…" : "Mark attendance"}
           </button>
+          <p className="mt-5 text-center text-xs text-[#4a4d85]">
+            Already marked attendance?{" "}
+            <Link to="/student/sign-out" className={linkClass}>
+              Sign out
+            </Link>
+          </p>
         </form>
       </div>
     </section>

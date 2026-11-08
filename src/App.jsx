@@ -25,6 +25,7 @@ import GenerateReceipt from "./pages/admin/GenerateReceipt";
 import AllReceipts from "./pages/admin/AllReceipts";
 import StaffAttendance from "./pages/attendance/StaffAttendance";
 import StudentAttendance from "./pages/attendance/StudentAttendance";
+import SignOut from "./pages/attendance/SignOut";
 import VerifyAttendance from "./pages/attendance/VerifyAttendance";
 import StaffOnboarding from "./pages/onboarding/StaffOnboarding";
 import StudentOnboarding from "./pages/onboarding/StudentOnboarding";
@@ -52,10 +53,18 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route
                 path="attendance/staff"
-                element={<AttendanceList type="staff" />}
+                element={<Navigate to="/admin/staff/attendance" replace />}
               />
               <Route
                 path="attendance/students"
+                element={<Navigate to="/admin/student/attendance" replace />}
+              />
+              <Route
+                path="staff/attendance"
+                element={<AttendanceList type="staff" />}
+              />
+              <Route
+                path="student/attendance"
                 element={<AttendanceList type="student" />}
               />
               <Route path="receipts/generate" element={<GenerateReceipt />} />
@@ -73,10 +82,26 @@ function App() {
           </Route>
 
           <Route element={<MainLayout />}>
-            <Route path="/attendance/staff" element={<StaffAttendance />} />
+            <Route
+              path="/attendance/staff"
+              element={<Navigate to="/staff/attendance" replace />}
+            />
             <Route
               path="/attendance/students"
+              element={<Navigate to="/student/attendance" replace />}
+            />
+            <Route path="/staff/attendance" element={<StaffAttendance />} />
+            <Route
+              path="/staff/sign-out"
+              element={<SignOut type="staff" />}
+            />
+            <Route
+              path="/student/attendance"
               element={<StudentAttendance />}
+            />
+            <Route
+              path="/student/sign-out"
+              element={<SignOut type="student" />}
             />
             <Route path="/attendance/verify" element={<VerifyAttendance />} />
             <Route path="/onboarding/staff" element={<StaffOnboarding />} />

@@ -24,10 +24,12 @@ const formatDate = (value) =>
   });
 
 const formatTime = (iso) =>
-  new Date(iso).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  iso
+    ? new Date(iso).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
 const AttendanceList = ({ type }) => {
   const isStaff = type === "staff";
@@ -51,10 +53,12 @@ const AttendanceList = ({ type }) => {
   const loadRecords = useCallback(async () => {
     try {
       const response = await apiRequest(`/api/${type}-attendance`);
-      setRecords(response.data.map((record) => ({
-        ...record,
-        time: record.created_at,
-      })));
+      setRecords(
+        response.data.map((record) => ({
+          ...record,
+          time: record.time_in || record.created_at,
+        })),
+      );
     } catch (requestError) {
       setError(requestError.message || "Unable to load attendance records.");
     } finally {
@@ -180,9 +184,20 @@ const AttendanceList = ({ type }) => {
                       </div>
                     </dl>
                   )}
-                  <p className="mt-3 text-xs text-slate-500">
-                    Recorded at {formatTime(record.time)}
-                  </p>
+                  <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div className="min-w-0">
+                      <dt className="text-xs text-slate-500">Time in</dt>
+                      <dd className="mt-0.5 text-slate-800">
+                        {formatTime(record.time)}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-xs text-slate-500">Time out</dt>
+                      <dd className="mt-0.5 text-slate-800">
+                        {formatTime(record.time_out)}
+                      </dd>
+                    </div>
+                  </dl>
                 </article>
               ))}
             </div>
@@ -210,7 +225,10 @@ const AttendanceList = ({ type }) => {
                     Date
                   </th>
                   <th scope="col" className="px-5 py-3 font-semibold">
-                    Time
+                    Time in
+                  </th>
+                  <th scope="col" className="px-5 py-3 font-semibold">
+                    Time out
                   </th>
                 </tr>
               </thead>
@@ -232,6 +250,7 @@ const AttendanceList = ({ type }) => {
                       {formatDate(record.attendance_date || record.time)}
                     </td>
                     <td className="px-5 py-4">{formatTime(record.time)}</td>
+                    <td className="px-5 py-4">{formatTime(record.time_out)}</td>
                   </tr>
                 ))}
               </tbody>

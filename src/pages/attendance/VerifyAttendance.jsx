@@ -22,7 +22,7 @@ const Row = ({ label, value }) => (
 );
 
 /**
- * record = { name, course, session?, time }  (time is an ISO string)
+ * record = { name, course, session?, time_in, time_out, time } (ISO timestamps)
  */
 const AttendanceVerification = ({ record }) => {
   if (!record) return null;
@@ -72,7 +72,13 @@ const AttendanceVerification = ({ record }) => {
           )}
           {record.session && <Row label="Session" value={record.session} />}
           <Row label="Date" value={formatDate(record.time)} />
-          <Row label="Time" value={formatTime(record.time)} />
+          <Row
+            label="Time in"
+            value={formatTime(record.time_in || record.time)}
+          />
+          {record.time_out && (
+            <Row label="Time out" value={formatTime(record.time_out)} />
+          )}
         </dl>
       </div>
     </section>

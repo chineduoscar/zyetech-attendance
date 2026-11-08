@@ -51,15 +51,15 @@ export const NAV_ITEMS = [
   },
   {
     key: "staff-attendance",
-    label: "Staff Attendance",
+    label: "staff/attendance",
     icon: "staffAttendance",
-    path: "/admin/attendance/staff",
+    path: "/admin/staff/attendance",
   },
   {
     key: "student-attendance",
     label: "Student Attendance",
     icon: "studentAttendance",
-    path: "/admin/attendance/students",
+    path: "/admin/student/attendance",
   },
   {
     key: "generate-receipts",
