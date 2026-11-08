@@ -83,29 +83,57 @@ const SignOut = ({ type }) => {
         </header>
 
         {record ? (
-          <div
-            role="status"
-            className="rounded-xl border border-emerald-200 bg-emerald-50 p-4"
-          >
-            <p className="font-semibold text-emerald-900">
+          <div className="text-center">
+            <div
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#eef0ff] text-[#06066f]"
+              aria-hidden="true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8"
+              >
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+            </div>
+            <h2
+              role="status"
+              className="text-2xl font-bold tracking-tight text-[#06066f]"
+            >
               Signed out successfully
+            </h2>
+            <p className="mb-6 mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
+              Your time out has been recorded.
             </p>
-            <dl className="mt-3 space-y-2 text-sm text-emerald-950">
-              <div className="flex justify-between gap-4">
-                <dt>{identifierLabel}</dt>
-                <dd className="font-semibold">
+            <dl className="rounded-xl bg-[#f6f7fc] px-4 text-left">
+              <div className="flex items-start justify-between gap-4 border-b border-[#e3e6f5] py-3">
+                <dt className="text-sm text-[#4a4d85]">Name</dt>
+                <dd className="text-right text-sm font-semibold text-[#06066f]">
+                  {record.name}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4 border-b border-[#e3e6f5] py-3">
+                <dt className="text-sm text-[#4a4d85]">{identifierLabel}</dt>
+                <dd className="text-right text-sm font-semibold text-[#06066f]">
                   {isStaff ? record.staff_number : record.student_number}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt>Time in</dt>
-                <dd className="font-semibold">
+              <div className="flex items-start justify-between gap-4 border-b border-[#e3e6f5] py-3">
+                <dt className="text-sm text-[#4a4d85]">Time in</dt>
+                <dd className="text-right text-sm font-semibold text-[#06066f]">
                   {formatTime(record.time_in || record.created_at)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt>Time out</dt>
-                <dd className="font-semibold">{formatTime(record.time_out)}</dd>
+              <div className="flex items-start justify-between gap-4 py-3 last:border-b-0">
+                <dt className="text-sm text-[#4a4d85]">Time out</dt>
+                <dd className="text-right text-sm font-semibold text-[#06066f]">
+                  {formatTime(record.time_out)}
+                </dd>
               </div>
             </dl>
           </div>

@@ -184,6 +184,14 @@ const AttendanceList = ({ type }) => {
                       </div>
                     </dl>
                   )}
+                  {isStaff && (
+                    <dl className="mt-4">
+                      <dt className="text-xs text-slate-500">Role(s)</dt>
+                      <dd className="mt-0.5 break-words text-sm text-slate-800">
+                        {record.roles?.length ? record.roles.join(", ") : "—"}
+                      </dd>
+                    </dl>
+                  )}
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                     <div className="min-w-0">
                       <dt className="text-xs text-slate-500">Time in</dt>
@@ -211,6 +219,11 @@ const AttendanceList = ({ type }) => {
                   <th scope="col" className="px-5 py-3 font-semibold">
                     Name
                   </th>
+                  {isStaff && (
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Role(s)
+                    </th>
+                  )}
                   {!isStaff && (
                     <th scope="col" className="px-5 py-3 font-semibold">
                       Course
@@ -242,6 +255,11 @@ const AttendanceList = ({ type }) => {
                       {isStaff ? record.staff_number : record.student_number}
                     </td>
                     <td className="px-5 py-4 font-medium">{record.name}</td>
+                    {isStaff && (
+                      <td className="px-5 py-4">
+                        {record.roles?.length ? record.roles.join(", ") : "—"}
+                      </td>
+                    )}
                     {!isStaff && <td className="px-5 py-4">{record.course}</td>}
                     {!isStaff && (
                       <td className="px-5 py-4">{record.session}</td>
