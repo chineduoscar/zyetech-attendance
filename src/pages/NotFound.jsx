@@ -1,6 +1,14 @@
 const NotFound = () => (
-  <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 text-[#06066f]">
-    <div className="text-center">
+  <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
+    <div className="h-fit w-full max-w-md rounded-2xl border border-[#cfd3ec] bg-white p-7 text-center shadow-sm sm:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-[#06066f]">
+          Page Not Found
+        </h1>
+        <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
+          The page you are looking for does not exist.
+        </p>
+      </header>
       <p
         aria-label="404"
         className="text-8xl font-extrabold leading-none tracking-tight"
@@ -9,11 +17,8 @@ const NotFound = () => (
         <span className="text-slate-950">0</span>
         <span className="text-[#06066f]">4</span>
       </p>
-      <h1 className="mt-5 text-xl font-semibold text-slate-900">
-        Page not found
-      </h1>
     </div>
-  </main>
+  </section>
 );
 
 export default NotFound;
