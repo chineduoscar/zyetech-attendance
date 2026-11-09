@@ -4,11 +4,10 @@ import AttendanceVerification from "./VerifyAttendance";
 import { ApiError, apiRequest } from "../../api/client";
 import FieldError from "../../components/FieldError";
 
-const SESSIONS = ["Morning", "Afternoon"];
 const CUTOFF_HOUR = 13; // 1:00 PM
 
 const getAvailableSessions = () =>
-  new Date().getHours() < CUTOFF_HOUR ? SESSIONS : ["Afternoon"];
+  new Date().getHours() < CUTOFF_HOUR ? ["Morning"] : ["Afternoon"];
 
 const fieldClass = (hasError) =>
   `w-full rounded-xl border-[1.5px] px-4 py-3 text-[#06066f] placeholder:text-[#9498c1] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
@@ -55,10 +54,7 @@ const StudentAttendance = () => {
     const next = {};
     if (!identifier.trim()) next.identifier = "Enter your student ID.";
     if (!activeSession) {
-      next.session =
-        availableSessions.length > 1
-          ? "Choose morning or afternoon."
-          : "Choose the afternoon session.";
+      next.session = `Choose the ${availableSessions[0].toLowerCase()} session.`;
     }
     return next;
   };
