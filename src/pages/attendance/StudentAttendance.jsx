@@ -68,7 +68,7 @@ const StudentAttendance = () => {
 
     setSaving(true);
     try {
-      const response = await apiRequest("/api/student-attendance", {
+      const response = await apiRequest("/api/student-attendance/sign-in", {
         method: "POST",
         body: JSON.stringify({
           identifier: identifier.trim(),
