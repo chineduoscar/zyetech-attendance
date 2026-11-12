@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ApiError, apiRequest } from "../../api/client";
 import FieldError from "../../components/FieldError";
+import {
+  getAttendanceMinutes,
+  getAttendanceScheduleError,
+} from "../../utils/attendanceSchedule";
 
 const fieldClass =
   "w-full rounded-xl border-[1.5px] border-[#cfd3ec] bg-white px-4 py-3 text-[#06066f] placeholder:text-[#9498c1] transition-colors hover:border-[#b4b9e4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400";
@@ -24,20 +28,45 @@ const SignOut = ({ type }) => {
   const identifierLabel = isStaff ? "Staff ID" : "Student ID";
   const attendancePath = isStaff ? "/staff/attendance" : "/student/attendance";
   const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentMinutes, setCurrentMinutes] = useState(() =>
+    getAttendanceMinutes(),
+  );
   const [error, setError] = useState("");
-  const [fieldError, setFieldError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [record, setRecord] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    const id = setInterval(() => setCurrentMinutes(getAttendanceMinutes()), 15000);
+    return () => clearInterval(id);
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const trimmedIdentifier = identifier.trim();
-    if (!trimmedIdentifier) {
-      setFieldError(`Enter your ${personType} ID.`);
+    const scheduleError = getAttendanceScheduleError(
+      "sign-out",
+      currentMinutes,
+    );
+    if (scheduleError) {
+      setError(scheduleError);
       return;
     }
 
-    setFieldError("");
+    const trimmedIdentifier = identifier.trim();
+    const trimmedEmail = email.trim();
+    const nextErrors = {};
+    if (!trimmedIdentifier) nextErrors.identifier = `Enter your ${personType} ID.`;
+    if (!trimmedEmail) nextErrors.email = "Enter your email address.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    setFieldErrors({});
     setError("");
     setSaving(true);
     try {
@@ -45,15 +74,19 @@ const SignOut = ({ type }) => {
         `/api/${personType}-attendance/sign-out`,
         {
           method: "POST",
-          body: JSON.stringify({ identifier: trimmedIdentifier }),
+          body: JSON.stringify({
+            identifier: trimmedIdentifier,
+            email: trimmedEmail,
+          }),
         },
       );
       setRecord(response.data);
       setIdentifier("");
+      setEmail("");
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.status === 404) {
         setError(
-          `No attendance was found for this ${personType} today. Mark attendance before signing out.`,
+          `The ${personType} ID and email address do not match an active profile, or no attendance was found for today.`,
         );
       } else if (
         requestError instanceof ApiError &&
@@ -70,6 +103,11 @@ const SignOut = ({ type }) => {
     }
   };
 
+  const scheduleError = getAttendanceScheduleError(
+    "sign-out",
+    currentMinutes,
+  );
+
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
       <div className="h-fit w-full max-w-md rounded-2xl border border-[#cfd3ec] bg-white p-7 shadow-sm sm:p-8">
@@ -78,7 +116,8 @@ const SignOut = ({ type }) => {
             {isStaff ? "Staff Sign Out" : "Student Sign Out"}
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your {personType} ID to record today&apos;s time out.
+            Enter your {personType} ID and registered email address to record
+            today&apos;s time out. Sign-out closes at 7:00 PM.
           </p>
         </header>
 
@@ -139,14 +178,42 @@ const SignOut = ({ type }) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
-            {error && (
+            {(scheduleError || error) && (
               <p
                 role="alert"
                 className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
               >
-                {error}
+                {scheduleError || error}
               </p>
             )}
+            <div className="mb-5">
+              <label
+                htmlFor="sign-out-email"
+                className="mb-1.5 block text-sm font-semibold text-[#06066f]"
+              >
+                Email address
+              </label>
+              <input
+                id="sign-out-email"
+                type="email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setFieldErrors((current) => ({ ...current, email: "" }));
+                  setError("");
+                }}
+                placeholder="you@example.com"
+                autoComplete="email"
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={
+                  fieldErrors.email ? "sign-out-email-error" : undefined
+                }
+                className={fieldClass}
+              />
+              <FieldError id="sign-out-email-error">
+                {fieldErrors.email}
+              </FieldError>
+            </div>
             <div className="mb-6">
               <label
                 htmlFor="sign-out-identifier"
@@ -160,24 +227,29 @@ const SignOut = ({ type }) => {
                 value={identifier}
                 onChange={(event) => {
                   setIdentifier(event.target.value);
-                  setFieldError("");
+                  setFieldErrors((current) => ({
+                    ...current,
+                    identifier: "",
+                  }));
                   setError("");
                 }}
                 placeholder={isStaff ? "e.g. E26/001" : "e.g. S26/001"}
                 autoComplete="off"
-                aria-invalid={Boolean(fieldError)}
+                aria-invalid={Boolean(fieldErrors.identifier)}
                 aria-describedby={
-                  fieldError ? "sign-out-identifier-error" : undefined
+                  fieldErrors.identifier
+                    ? "sign-out-identifier-error"
+                    : undefined
                 }
                 className={fieldClass}
               />
               <FieldError id="sign-out-identifier-error">
-                {fieldError}
+                {fieldErrors.identifier}
               </FieldError>
             </div>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || Boolean(scheduleError)}
               className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
             >
               {saving ? "Signing out…" : "Sign out"}

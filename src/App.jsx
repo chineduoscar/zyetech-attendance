@@ -30,6 +30,7 @@ import VerifyAttendance from "./pages/attendance/VerifyAttendance";
 import StaffOnboarding from "./pages/onboarding/StaffOnboarding";
 import StudentOnboarding from "./pages/onboarding/StudentOnboarding";
 import NotFound from "./pages/NotFound";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -37,30 +38,25 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route element={<AuthPageRoute />}>
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/dean/login" element={<AdminLogin />} />
+            <Route path="/dean/register" element={<Register />} />
           </Route>
 
           <Route element={<SignedInRoute />}>
-            <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route
+              path="/dean/pending-approval"
+              element={<PendingApproval />}
+            />
           </Route>
 
-          <Route
-            path="/admin/attendance/staff"
-            element={<NotFound />}
-          />
-          <Route
-            path="/admin/attendance/students"
-            element={<NotFound />}
-          />
           <Route path="/attendance/staff" element={<NotFound />} />
           <Route path="/attendance/students" element={<NotFound />} />
 
           <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<DashboardLayout />}>
+            <Route path="/dean" element={<DashboardLayout />}>
               <Route
                 index
-                element={<Navigate to="/admin/dashboard" replace />}
+                element={<Navigate to="/dean/dashboard" replace />}
               />
               <Route path="dashboard" element={<Dashboard />} />
               <Route
@@ -107,10 +103,7 @@ function App() {
             />
           </Route>
 
-          <Route
-            path="/"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
+          <Route path="/" element={<Home />} />
           <Route
             path="*"
             element={<NotFound />}

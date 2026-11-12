@@ -124,7 +124,7 @@ const Sidebar = ({
       </div>
 
       {user && ["admin", "superadmin"].includes(user.role) && (
-        <nav aria-label="Admin" className="flex flex-col gap-1 px-3 py-4">
+        <nav aria-label="Dean" className="flex flex-col gap-1 px-3 py-4">
           {NAV_ITEMS.filter(
             (item) =>
               item.key !== "user-management" || user.role === "superadmin",
@@ -161,7 +161,7 @@ const Sidebar = ({
             <path d="M5 21a7 7 0 0 1 14 0" />
           </Icon>
           <span className={`${labelClass} min-w-0 truncate`}>
-            {user?.name || "Administrator"}
+            {user?.name || "Dean"}
           </span>
         </div>
         <button

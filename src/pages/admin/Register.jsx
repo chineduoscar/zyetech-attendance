@@ -36,8 +36,8 @@ const Register = () => {
       navigate(
         user.approval_status === "approved" &&
           ["admin", "superadmin"].includes(user.role)
-          ? "/admin/dashboard"
-          : "/pending-approval",
+          ? "/dean/dashboard"
+          : "/dean/pending-approval",
         { replace: true },
       );
     } catch (requestError) {
@@ -164,7 +164,7 @@ const Register = () => {
         <p className="mt-6 text-center text-sm text-[#4a4d85]">
           Already registered?{" "}
           <Link
-            to="/admin/login"
+            to="/dean/login"
             className="font-semibold text-[#06066f] underline"
           >
             Sign in

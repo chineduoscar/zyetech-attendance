@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AttendanceVerification from "./VerifyAttendance";
 import { ApiError, apiRequest } from "../../api/client";
 import FieldError from "../../components/FieldError";
+import {
+  getAttendanceMinutes,
+  getAttendanceScheduleError,
+} from "../../utils/attendanceSchedule";
 import { Link } from "react-router-dom";
 
 const fieldClass = (hasError) =>
@@ -16,10 +20,19 @@ const linkClass =
 
 const StaffAttendance = () => {
   const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentMinutes, setCurrentMinutes] = useState(() =>
+    getAttendanceMinutes(),
+  );
   const [errors, setErrors] = useState({});
   const [notFound, setNotFound] = useState(false);
   const [submitted, setSubmitted] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const id = setInterval(() => setCurrentMinutes(getAttendanceMinutes()), 15000);
+    return () => clearInterval(id);
+  }, []);
 
   const clearErrors = (field) => {
     setErrors((current) => ({
@@ -32,7 +45,16 @@ const StaffAttendance = () => {
 
   const validate = () => {
     const next = {};
+    const scheduleError = getAttendanceScheduleError(
+      "sign-in",
+      currentMinutes,
+    );
+    if (scheduleError) next.form = scheduleError;
     if (!identifier.trim()) next.identifier = "Enter your staff ID.";
+    if (!email.trim()) next.email = "Enter your email address.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      next.email = "Enter a valid email address.";
+    }
     return next;
   };
 
@@ -47,20 +69,24 @@ const StaffAttendance = () => {
     try {
       const response = await apiRequest("/api/staff-attendance/sign-in", {
         method: "POST",
-        body: JSON.stringify({ identifier: identifier.trim() }),
+        body: JSON.stringify({
+          identifier: identifier.trim(),
+          email: email.trim(),
+        }),
       });
       setSubmitted({
         ...response.data,
         time: response.data.created_at,
       });
       setIdentifier("");
+      setEmail("");
     } catch (error) {
       const fieldErrors =
         error instanceof ApiError && error.errors ? { ...error.errors } : {};
 
       if (error.status === 404) {
         setNotFound(true);
-        setErrors({ identifier: "No staff found with this ID." });
+        setErrors({});
       } else if (Object.keys(fieldErrors).length > 0) {
         setErrors(fieldErrors);
       } else {
@@ -85,6 +111,10 @@ const StaffAttendance = () => {
   }
 
   const errorCount = Object.values(errors).filter(Boolean).length;
+  const scheduleError = getAttendanceScheduleError(
+    "sign-in",
+    currentMinutes,
+  );
 
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
@@ -94,7 +124,8 @@ const StaffAttendance = () => {
             Staff Attendance
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your staff ID to mark attendance.
+            Enter your staff ID and registered email address to mark
+            attendance.
           </p>
         </header>
 
@@ -105,7 +136,8 @@ const StaffAttendance = () => {
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-amber-950">
-                Staff ID not found. Check for typos or register.
+                No active staff member matches this ID and email. Check for
+                typos or register.
               </p>
               <Link
                 to="/onboarding/staff"
@@ -117,7 +149,7 @@ const StaffAttendance = () => {
           </div>
         )}
 
-        {errors.form && (
+        {(scheduleError || errors.form) && (
           <div
             role="alert"
             className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 border-l-4 border-l-red-600 bg-red-50/70 p-4 shadow-sm"
@@ -138,7 +170,9 @@ const StaffAttendance = () => {
               <p className="text-sm font-semibold text-red-900">
                 Attendance not saved
               </p>
-              <p className="mt-0.5 text-sm text-red-800">{errors.form}</p>
+              <p className="mt-0.5 text-sm text-red-800">
+                {scheduleError || errors.form}
+              </p>
             </div>
           </div>
         )}
@@ -151,6 +185,30 @@ const StaffAttendance = () => {
         )}
 
         <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-5">
+            <label
+              htmlFor="sa-email"
+              className="mb-1.5 block text-sm font-semibold text-[#06066f]"
+            >
+              Email address
+            </label>
+            <input
+              id="sa-email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearErrors("email");
+              }}
+              placeholder="you@example.com"
+              autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "sa-email-error" : undefined}
+              className={fieldClass(errors.email)}
+            />
+            <FieldError id="sa-email-error">{errors.email}</FieldError>
+          </div>
+
           <div className="mb-5">
             <label
               htmlFor="sa-identifier"
@@ -188,7 +246,7 @@ const StaffAttendance = () => {
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || Boolean(scheduleError)}
             className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
           >
             {saving ? "Saving…" : "Mark attendance"}

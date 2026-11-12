@@ -40,44 +40,44 @@ export const STAFF_ROLES = [
   "Other",
 ];
 
-// Sidebar menu items. Each path is registered under the admin layout in App.jsx.
+// Sidebar menu items. Each path is registered under the dean layout in App.jsx.
 export const NAV_ITEMS = [
-  { key: "dashboard", label: "Home", icon: "home", path: "/admin/dashboard" },
+  { key: "dashboard", label: "Home", icon: "home", path: "/dean/dashboard" },
   {
     key: "user-management",
     label: "User Management",
     icon: "userManagement",
-    path: "/admin/users",
+    path: "/dean/users",
   },
   {
     key: "staff-attendance",
     label: "Staff Attendance",
     icon: "staffAttendance",
-    path: "/admin/staff/attendance",
+    path: "/dean/staff/attendance",
   },
   {
     key: "student-attendance",
     label: "Student Attendance",
     icon: "studentAttendance",
-    path: "/admin/student/attendance",
+    path: "/dean/student/attendance",
   },
   {
     key: "generate-receipts",
     label: "Generate Receipt",
     icon: "generateReceipts",
-    path: "/admin/receipts/generate",
+    path: "/dean/receipts/generate",
   },
   {
     key: "all-receipts",
     label: "All Receipts",
     icon: "allReceipts",
-    path: "/admin/receipts",
+    path: "/dean/receipts",
   },
   {
     key: "students",
     label: "Students",
     icon: "students",
-    path: "/admin/students",
+    path: "/dean/students",
   },
-  { key: "staffs", label: "Staffs", icon: "staffs", path: "/admin/staff" },
+  { key: "staffs", label: "Staffs", icon: "staffs", path: "/dean/staff" },
 ];

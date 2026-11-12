@@ -20,7 +20,7 @@ const DashboardLayout = () => {
     setLoggingOut(true);
     try {
       await logout();
-      navigate("/admin/login", { replace: true });
+      navigate("/dean/login", { replace: true });
     } catch (error) {
       setLogoutError(error.message || "Unable to log out. Please try again.");
       setLoggingOut(false);

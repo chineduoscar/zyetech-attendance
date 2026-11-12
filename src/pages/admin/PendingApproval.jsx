@@ -14,7 +14,7 @@ const PendingApproval = () => {
     setSubmitting(true);
     try {
       await logout();
-      window.location.assign("/admin/login");
+      window.location.assign("/dean/login");
     } catch (requestError) {
       setError(requestError.message || "Unable to log out. Please retry.");
       setSubmitting(false);
@@ -41,9 +41,9 @@ const PendingApproval = () => {
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           {!isApproved
-            ? "Your account is waiting for a superadmin to approve it. You cannot access the administration dashboard until your account is approved and assigned an admin or superadmin role."
+            ? "Your account is waiting for a superadmin to approve it. You cannot access the dean dashboard until your account is approved and assigned an admin or superadmin role."
             : hasAdminRole
-              ? "Your account is approved. You can now access the administration dashboard."
+              ? "Your account is approved. You can now access the dean dashboard."
               : "Your account is approved and waiting for a superadmin to assign an admin or superadmin role before dashboard access is enabled."}
         </p>
         <p className="mt-4 text-sm text-slate-600">

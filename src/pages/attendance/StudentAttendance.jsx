@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import AttendanceVerification from "./VerifyAttendance";
 import { ApiError, apiRequest } from "../../api/client";
 import FieldError from "../../components/FieldError";
+import {
+  getAttendanceMinutes,
+  getAttendanceScheduleError,
+  getStudentAttendanceSession,
+} from "../../utils/attendanceSchedule";
 
-const CUTOFF_HOUR = 13; // 1:00 PM
-
-const getAvailableSessions = () =>
-  new Date().getHours() < CUTOFF_HOUR ? ["Morning"] : ["Afternoon"];
+const getCurrentAttendanceMinutes = () => getAttendanceMinutes();
 
 const fieldClass = (hasError) =>
   `w-full rounded-xl border-[1.5px] px-4 py-3 text-[#06066f] placeholder:text-[#9498c1] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
@@ -21,22 +23,24 @@ const linkClass =
 
 const StudentAttendance = () => {
   const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [session, setSession] = useState("");
-  const [availableSessions, setAvailableSessions] =
-    useState(getAvailableSessions);
+  const [currentMinutes, setCurrentMinutes] = useState(
+    getCurrentAttendanceMinutes,
+  );
+  const availableSessions = [getStudentAttendanceSession(currentMinutes)];
   const [errors, setErrors] = useState({});
   const [notFound, setNotFound] = useState(false);
   const [submitted, setSubmitted] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // If the chosen session is no longer available (e.g. Morning after 1 PM), treat it as not selected
+  // If the session window changes, require the student to select the current session.
   const activeSession = availableSessions.includes(session) ? session : "";
 
-  // Re-check every minute so Morning disappears at 1:00 PM without a refresh
   useEffect(() => {
     const id = setInterval(
-      () => setAvailableSessions(getAvailableSessions()),
-      60000,
+      () => setCurrentMinutes(getCurrentAttendanceMinutes()),
+      15000,
     );
     return () => clearInterval(id);
   }, []);
@@ -52,7 +56,16 @@ const StudentAttendance = () => {
 
   const validate = () => {
     const next = {};
+    const scheduleError = getAttendanceScheduleError(
+      "sign-in",
+      currentMinutes,
+    );
+    if (scheduleError) next.form = scheduleError;
     if (!identifier.trim()) next.identifier = "Enter your student ID.";
+    if (!email.trim()) next.email = "Enter your email address.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      next.email = "Enter a valid email address.";
+    }
     if (!activeSession) {
       next.session = `Choose the ${availableSessions[0].toLowerCase()} session.`;
     }
@@ -72,6 +85,7 @@ const StudentAttendance = () => {
         method: "POST",
         body: JSON.stringify({
           identifier: identifier.trim(),
+          email: email.trim(),
           session: activeSession,
         }),
       });
@@ -80,6 +94,7 @@ const StudentAttendance = () => {
         time: response.data.created_at,
       });
       setIdentifier("");
+      setEmail("");
       setSession("");
     } catch (error) {
       const fieldErrors =
@@ -87,7 +102,7 @@ const StudentAttendance = () => {
 
       if (error.status === 404) {
         setNotFound(true);
-        setErrors({ identifier: "No student found with this ID." });
+        setErrors({});
       } else if (Object.keys(fieldErrors).length > 0) {
         setErrors(fieldErrors);
       } else {
@@ -112,6 +127,10 @@ const StudentAttendance = () => {
   }
 
   const errorCount = Object.values(errors).filter(Boolean).length;
+  const scheduleError = getAttendanceScheduleError(
+    "sign-in",
+    currentMinutes,
+  );
 
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
@@ -121,8 +140,8 @@ const StudentAttendance = () => {
             Student Attendance
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your student ID and select the session you are attending
-            today.
+            Enter your student ID and registered email address, then select
+            the session you are attending today.
           </p>
         </header>
 
@@ -133,7 +152,8 @@ const StudentAttendance = () => {
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-amber-950">
-                Student ID not found. Check for typos or register.
+                No active student matches this ID and email. Check for typos or
+                register.
               </p>
               <Link
                 to="/onboarding/students"
@@ -145,7 +165,7 @@ const StudentAttendance = () => {
           </div>
         )}
 
-        {errors.form && (
+        {(scheduleError || errors.form) && (
           <div
             role="alert"
             className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 border-l-4 border-l-red-600 bg-red-50/70 p-4 shadow-sm"
@@ -166,7 +186,9 @@ const StudentAttendance = () => {
               <p className="text-sm font-semibold text-red-900">
                 Attendance not saved
               </p>
-              <p className="mt-0.5 text-sm text-red-800">{errors.form}</p>
+              <p className="mt-0.5 text-sm text-red-800">
+                {scheduleError || errors.form}
+              </p>
             </div>
           </div>
         )}
@@ -179,6 +201,30 @@ const StudentAttendance = () => {
         )}
 
         <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-5">
+            <label
+              htmlFor="st-email"
+              className="mb-1.5 block text-sm font-semibold text-[#06066f]"
+            >
+              Email address
+            </label>
+            <input
+              id="st-email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearErrors("email");
+              }}
+              placeholder="you@example.com"
+              autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "st-email-error" : undefined}
+              className={fieldClass(errors.email)}
+            />
+            <FieldError id="st-email-error">{errors.email}</FieldError>
+          </div>
+
           <div className="mb-5">
             <label
               htmlFor="st-identifier"
@@ -276,7 +322,7 @@ const StudentAttendance = () => {
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || Boolean(scheduleError)}
             className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
           >
             {saving ? "Saving…" : "Mark attendance"}

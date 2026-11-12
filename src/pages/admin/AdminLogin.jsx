@@ -22,8 +22,8 @@ const AdminLogin = () => {
       navigate(
         user.approval_status === "approved" &&
           ["admin", "superadmin"].includes(user.role)
-          ? location.state?.from?.pathname || "/admin/dashboard"
-          : "/pending-approval",
+          ? location.state?.from?.pathname || "/dean/dashboard"
+          : "/dean/pending-approval",
         { replace: true },
       );
     } catch (requestError) {
@@ -60,9 +60,9 @@ const AdminLogin = () => {
             </p>
           </div>
         </div>
-        <h1 className="text-2xl font-bold">Admin login</h1>
+        <h1 className="text-2xl font-bold">Dean login</h1>
         <p className="mb-6 mt-2 text-sm text-[#4a4d85]">
-          Sign in to access the administration dashboard.
+          Sign in to access the dean dashboard.
         </p>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
@@ -130,7 +130,7 @@ const AdminLogin = () => {
         <p className="mt-6 text-center text-sm text-[#4a4d85]">
           Need an account?{" "}
           <Link
-            to="/register"
+            to="/dean/register"
             className="font-semibold text-[#06066f] underline"
           >
             Register
