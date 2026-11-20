@@ -1,24 +1,3 @@
-export const COURSES = [
-  "AI Automation",
-  "Back End Development",
-  "Content Creation",
-  "Cybersecurity",
-  "Data Analysis with AI and Machine Learning",
-  "Data Analysis with Python",
-  "Data Analytics",
-  "Data Science",
-  "Digital Marketing",
-  "Front End Development",
-  "Full Stack Development",
-  "Generative AI for Video Animation",
-  "Graphics Design",
-  "Kiddies Bootcamp",
-  "Product Design",
-  "UI/UX Design",
-  "Video Editing",
-  "Virtual Assistance",
-];
-
 export const STAFF_ROLES = [
   "AI Automation Specialist",
   "Back End Developer",
