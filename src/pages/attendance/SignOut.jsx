@@ -6,6 +6,7 @@ import {
   getAttendanceMinutes,
   getAttendanceScheduleError,
 } from "../../utils/attendanceSchedule";
+import { getOfficeLocation } from "../../utils/officeLocation";
 
 const fieldClass =
   "w-full rounded-xl border-[1.5px] border-[#cfd3ec] bg-white px-4 py-3 text-[#06066f] placeholder:text-[#9498c1] transition-colors hover:border-[#b4b9e4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400";
@@ -38,7 +39,10 @@ const SignOut = ({ type }) => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const id = setInterval(() => setCurrentMinutes(getAttendanceMinutes()), 15000);
+    const id = setInterval(
+      () => setCurrentMinutes(getAttendanceMinutes()),
+      15000,
+    );
     return () => clearInterval(id);
   }, []);
 
@@ -56,7 +60,8 @@ const SignOut = ({ type }) => {
     const trimmedIdentifier = identifier.trim();
     const trimmedEmail = email.trim();
     const nextErrors = {};
-    if (!trimmedIdentifier) nextErrors.identifier = `Enter your ${personType} ID.`;
+    if (!trimmedIdentifier)
+      nextErrors.identifier = `Enter your ${personType} ID.`;
     if (!trimmedEmail) nextErrors.email = "Enter your email address.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       nextErrors.email = "Enter a valid email address.";
@@ -70,6 +75,7 @@ const SignOut = ({ type }) => {
     setError("");
     setSaving(true);
     try {
+      const location = await getOfficeLocation();
       const response = await apiRequest(
         `/api/${personType}-attendance/sign-out`,
         {
@@ -77,6 +83,7 @@ const SignOut = ({ type }) => {
           body: JSON.stringify({
             identifier: trimmedIdentifier,
             email: trimmedEmail,
+            ...location,
           }),
         },
       );
@@ -103,10 +110,7 @@ const SignOut = ({ type }) => {
     }
   };
 
-  const scheduleError = getAttendanceScheduleError(
-    "sign-out",
-    currentMinutes,
-  );
+  const scheduleError = getAttendanceScheduleError("sign-out", currentMinutes);
 
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
@@ -116,8 +120,8 @@ const SignOut = ({ type }) => {
             {isStaff ? "Staff Sign Out" : "Student Sign Out"}
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your {personType} ID and registered email address to record
-            today&apos;s time out. Sign-out closes at 7:00 PM.
+            Please provide your details to record your time out. Kindly ensure
+            you are at the office before signing out. Sign-out closes at 7:00 PM
           </p>
         </header>
 
@@ -252,7 +256,7 @@ const SignOut = ({ type }) => {
               disabled={saving || Boolean(scheduleError)}
               className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
             >
-              {saving ? "Signing out…" : "Sign out"}
+              {saving ? "Checking location…" : "Sign out"}
             </button>
           </form>
         )}

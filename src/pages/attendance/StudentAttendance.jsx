@@ -8,6 +8,7 @@ import {
   getAttendanceScheduleError,
   getStudentAttendanceSession,
 } from "../../utils/attendanceSchedule";
+import { getOfficeLocation } from "../../utils/officeLocation";
 
 const getCurrentAttendanceMinutes = () => getAttendanceMinutes();
 
@@ -56,10 +57,7 @@ const StudentAttendance = () => {
 
   const validate = () => {
     const next = {};
-    const scheduleError = getAttendanceScheduleError(
-      "sign-in",
-      currentMinutes,
-    );
+    const scheduleError = getAttendanceScheduleError("sign-in", currentMinutes);
     if (scheduleError) next.form = scheduleError;
     if (!identifier.trim()) next.identifier = "Enter your student ID.";
     if (!email.trim()) next.email = "Enter your email address.";
@@ -81,12 +79,14 @@ const StudentAttendance = () => {
 
     setSaving(true);
     try {
+      const location = await getOfficeLocation();
       const response = await apiRequest("/api/student-attendance/sign-in", {
         method: "POST",
         body: JSON.stringify({
           identifier: identifier.trim(),
           email: email.trim(),
           session: activeSession,
+          ...location,
         }),
       });
       setSubmitted({
@@ -127,10 +127,7 @@ const StudentAttendance = () => {
   }
 
   const errorCount = Object.values(errors).filter(Boolean).length;
-  const scheduleError = getAttendanceScheduleError(
-    "sign-in",
-    currentMinutes,
-  );
+  const scheduleError = getAttendanceScheduleError("sign-in", currentMinutes);
 
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
@@ -140,8 +137,8 @@ const StudentAttendance = () => {
             Student Attendance
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your student ID and registered email address, then select
-            the session you are attending today.
+            Please provide your details to mark attendance. Ensure you are at
+            the office
           </p>
         </header>
 
@@ -325,7 +322,7 @@ const StudentAttendance = () => {
             disabled={saving || Boolean(scheduleError)}
             className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
           >
-            {saving ? "Saving…" : "Mark attendance"}
+            {saving ? "Checking location…" : "Mark attendance"}
           </button>
           <p className="mt-5 text-center text-xs text-[#4a4d85]">
             Already marked attendance?{" "}

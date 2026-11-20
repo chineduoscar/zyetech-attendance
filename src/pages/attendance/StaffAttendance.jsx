@@ -7,6 +7,7 @@ import {
   getAttendanceScheduleError,
 } from "../../utils/attendanceSchedule";
 import { Link } from "react-router-dom";
+import { getOfficeLocation } from "../../utils/officeLocation";
 
 const fieldClass = (hasError) =>
   `w-full rounded-xl border-[1.5px] px-4 py-3 text-[#06066f] placeholder:text-[#9498c1] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
@@ -30,7 +31,10 @@ const StaffAttendance = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const id = setInterval(() => setCurrentMinutes(getAttendanceMinutes()), 15000);
+    const id = setInterval(
+      () => setCurrentMinutes(getAttendanceMinutes()),
+      15000,
+    );
     return () => clearInterval(id);
   }, []);
 
@@ -45,10 +49,7 @@ const StaffAttendance = () => {
 
   const validate = () => {
     const next = {};
-    const scheduleError = getAttendanceScheduleError(
-      "sign-in",
-      currentMinutes,
-    );
+    const scheduleError = getAttendanceScheduleError("sign-in", currentMinutes);
     if (scheduleError) next.form = scheduleError;
     if (!identifier.trim()) next.identifier = "Enter your staff ID.";
     if (!email.trim()) next.email = "Enter your email address.";
@@ -67,11 +68,13 @@ const StaffAttendance = () => {
 
     setSaving(true);
     try {
+      const location = await getOfficeLocation();
       const response = await apiRequest("/api/staff-attendance/sign-in", {
         method: "POST",
         body: JSON.stringify({
           identifier: identifier.trim(),
           email: email.trim(),
+          ...location,
         }),
       });
       setSubmitted({
@@ -111,10 +114,7 @@ const StaffAttendance = () => {
   }
 
   const errorCount = Object.values(errors).filter(Boolean).length;
-  const scheduleError = getAttendanceScheduleError(
-    "sign-in",
-    currentMinutes,
-  );
+  const scheduleError = getAttendanceScheduleError("sign-in", currentMinutes);
 
   return (
     <section className="flex min-h-full flex-1 items-center justify-center px-5 py-12">
@@ -124,8 +124,8 @@ const StaffAttendance = () => {
             Staff Attendance
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-[#4a4d85]">
-            Enter your staff ID and registered email address to mark
-            attendance.
+            Please provide your details to mark attendance. Ensure you are at
+            the office.
           </p>
         </header>
 
@@ -249,7 +249,7 @@ const StaffAttendance = () => {
             disabled={saving || Boolean(scheduleError)}
             className="w-full cursor-pointer rounded-xl bg-[#06066f] py-3.5 font-semibold text-white shadow-xs transition-all hover:bg-[#04044f] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
           >
-            {saving ? "Saving…" : "Mark attendance"}
+            {saving ? "Checking location…" : "Mark attendance"}
           </button>
           <p className="mt-5 text-center text-xs text-[#4a4d85]">
             Already marked attendance?{" "}
