@@ -42,7 +42,7 @@ Vite proxies `/api` requests to `http://localhost:3000`. Leave `VITE_API_BASE_UR
 
 ### Netlify and Render deployment
 
-The production frontend sends API requests to its own origin (`/api/...`). The `public/_redirects` rule proxies those requests to `https://zyetech-attendance-api.onrender.com`, keeping the browser and authentication cookie on the Netlify site instead of making cross-site API requests. Production builds intentionally ignore `VITE_API_BASE_URL`; do not set it to the Render URL in Netlify.
+The production frontend sends API requests to its own origin (`/api/...`). The `public/_redirects` rule proxies those requests to `https://api-zyetech-attendance.onrender.com`, keeping the browser and authentication cookie on the Netlify site instead of making cross-site API requests. Production builds intentionally ignore `VITE_API_BASE_URL`; do not set it to the Render URL in Netlify.
 
 In the Render backend environment, set `CORS_ORIGINS` to the exact public Netlify site origin (for example, `https://your-site.netlify.app`, without a trailing slash). Include additional frontend origins as a comma-separated list only if they should be allowed. Redeploy the frontend on Netlify and restart/redeploy the backend on Render after changing environment variables.
 
@@ -56,12 +56,12 @@ Do not set this variable to an email address that should not receive full user-m
 
 ## Authentication and user management
 
-| URL | Page |
-| --- | --- |
-| `/dean/login` | Dean dashboard sign in |
-| `/dean/register` | Create an unapproved account with no assigned role |
-| `/dean/pending-approval` | Explain pending approval or role assignment |
-| `/dean/users` | Superadmin-only user directory |
+| URL                      | Page                                               |
+| ------------------------ | -------------------------------------------------- |
+| `/dean/login`            | Dean dashboard sign in                             |
+| `/dean/register`         | Create an unapproved account with no assigned role |
+| `/dean/pending-approval` | Explain pending approval or role assignment        |
+| `/dean/users`            | Superadmin-only user directory                     |
 
 The frontend verifies sessions through `GET /api/auth/me` before showing protected admin pages. The backend authenticates requests from the `HttpOnly` `zyetech_auth` cookie (and retains bearer-token support for existing API clients), and reloads the user's current role from PostgreSQL for protected requests.
 
@@ -95,16 +95,16 @@ For cross-site deployments, the browser must be allowed to send credentialed req
 
 The backend creates the application tables when it starts. Students, staff, attendance submissions, receipts created through the backend API, and administrator accounts are stored in PostgreSQL and are shared across browsers and devices. The `/dean/receipts/generate` page saves receipt details in PostgreSQL and the generated PDF in Cloudinary.
 
-| Admin page | Data |
-| --- | --- |
-| `/dean/dashboard` | Live student/staff totals, today's attendance, and this month's receipts |
-| `/dean/students` | Create, edit, and list student profiles (name, email, phone, course, status) |
-| `/dean/staff` | Create, edit, and list staff profiles (name, email, phone, status) |
-| `/dean/student/attendance` | Student attendance submitted by the public student form |
-| `/dean/staff/attendance` | Staff attendance submitted by the public staff form |
-| `/dean/receipts/generate` | Generate a payment receipt, save it in PostgreSQL, and store its PDF in Cloudinary |
-| `/dean/receipts` | Browse receipts; superadmins can delete a receipt and its Cloudinary file |
-| `/dean/users` | Superadmins approve accounts and manage administrator roles |
+| Admin page                 | Data                                                                               |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `/dean/dashboard`          | Live student/staff totals, today's attendance, and this month's receipts           |
+| `/dean/students`           | Create, edit, and list student profiles (name, email, phone, course, status)       |
+| `/dean/staff`              | Create, edit, and list staff profiles (name, email, phone, status)                 |
+| `/dean/student/attendance` | Student attendance submitted by the public student form                            |
+| `/dean/staff/attendance`   | Staff attendance submitted by the public staff form                                |
+| `/dean/receipts/generate`  | Generate a payment receipt, save it in PostgreSQL, and store its PDF in Cloudinary |
+| `/dean/receipts`           | Browse receipts; superadmins can delete a receipt and its Cloudinary file          |
+| `/dean/users`              | Superadmins approve accounts and manage administrator roles                        |
 
 Attendance forms and sign-out forms are public and write directly to PostgreSQL. Student and staff sign-in is available from 10:00 AM until 7:00 PM, and sign-out closes at 7:00 PM; these limits are enforced by the backend using Africa/Lagos time. The student session selector shows Morning before 1:00 PM, Afternoon from 1:00 PM until 5:30 PM, Evening from 5:30 PM until 7:00 PM, and Morning again outside those hours. Sign-in remains unavailable before 10:00 AM and from 7:00 PM until 10:00 AM the next day. Staff and students must enter both their registered email address and ID to sign in or sign out; the backend verifies that they match an active directory record. They sign out on `/staff/sign-out` or `/student/sign-out`. The attendance record stores time in when attendance is marked and leaves time out blank until sign-out. The retired attendance submission API endpoints return `410 Gone`; clients must use the current `/sign-in` endpoints. Reading attendance and managing directories or receipts requires an admin/superadmin session. Only superadmins can delete student/staff directory records; deleting a student leaves their receipts saved and unlinks them from the deleted profile. Receipts without a supplied receipt number receive one generated by the backend.
 
@@ -126,11 +126,11 @@ Receipts are matched to student profiles by an exact, case-insensitive name matc
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Build the frontend into `dist/` |
+| Command           | Description                           |
+| ----------------- | ------------------------------------- |
+| `npm run dev`     | Start the Vite development server     |
+| `npm run build`   | Build the frontend into `dist/`       |
 | `npm run preview` | Preview the production frontend build |
-| `npm run lint` | Run ESLint |
+| `npm run lint`    | Run ESLint                            |
 
 The home page at `/` contains general information only and does not link to attendance or dean pages. Deploy the frontend as a static site with SPA fallback to `index.html` for nested routes such as `/dean/dashboard`.
