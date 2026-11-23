@@ -1,2 +1,2 @@
-/api/*  https://zyetech-attendance-api.onrender.com/api/:splat  200
+/api/*  https://api-zyetech-attendance.onrender.com/api/:splat  200
 /*      /index.html   200

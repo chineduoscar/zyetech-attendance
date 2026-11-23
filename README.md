@@ -38,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Vite proxies `/api` requests to `http://localhost:3000`. Leave `VITE_API_BASE_URL` empty for local development. For a separately hosted API, set it to the API origin in the frontend environment.
+Vite proxies `/api` requests to `http://localhost:3000`. Leave `VITE_API_BASE_URL` empty for local development. When running Vite against a separately hosted API, set it to that API origin; this setting does not configure the production frontend.
 
 ### Netlify and Render deployment
 
