@@ -20,7 +20,7 @@ const Home = () => (
           staff.
         </p>
         <p className="mt-5 text-sm font-medium text-[#4a4d85]">
-          Sign-in is available from 10:00 AM. Sign-out closes at 7:00 PM.
+          Sign-in is available from 9:40 AM. Sign-out closes at 7:00 PM.
         </p>
       </section>
     </main>
